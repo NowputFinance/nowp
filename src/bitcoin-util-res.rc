@@ -14,14 +14,14 @@ BEGIN
     BEGIN
         BLOCK "040904E4" // U.S. English - multilingual (hex)
         BEGIN
-            VALUE "CompanyName",        "Peercoin"
-            VALUE "FileDescription",    "peercoin-util (CLI Peercoin utility)"
+            VALUE "CompanyName",        "Nowp"
+            VALUE "FileDescription",    "nowp-util (CLI Nowp utility)"
             VALUE "FileVersion",        PACKAGE_VERSION
-            VALUE "InternalName",       "peercoin-util"
+            VALUE "InternalName",       "nowp-util"
             VALUE "LegalCopyright",     COPYRIGHT_STR
             VALUE "LegalTrademarks1",   "Distributed under the MIT software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php."
-            VALUE "OriginalFilename",   "peercoin-util.exe"
-            VALUE "ProductName",        "peercoin-util"
+            VALUE "OriginalFilename",   "nowp-util.exe"
+            VALUE "ProductName",        "nowp-util"
             VALUE "ProductVersion",     PACKAGE_VERSION
         END
     END

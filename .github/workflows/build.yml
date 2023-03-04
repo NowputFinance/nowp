@@ -107,7 +107,7 @@ jobs:
         working-directory: ${{ env.GITIAN_DIR }}
         run: |
           sed -i "s/^\ \ \(HOSTS=\"\).*/\ \ \1${{ matrix.host }}\"/g" ${{ steps.detect.outputs.descriptor }}
-          ./bin/gbuild -j $MAKEJOBS ${{ steps.detect.outputs.fetch-tags }} --commit peercoin=${{ steps.detect.outputs.commit-or-tag }} --url peercoin=${{ github.server_url }}/${{ github.repository }} ${{ steps.detect.outputs.descriptor }}
+          ./bin/gbuild -j $MAKEJOBS ${{ steps.detect.outputs.fetch-tags }} --commit nowp=${{ steps.detect.outputs.commit-or-tag }} --url nowp=${{ github.server_url }}/${{ github.repository }} ${{ steps.detect.outputs.descriptor }}
           cp -r ${GITIAN_DIR}/build/out/* ${{ steps.detect.outputs.build-dir }}/
 
       - name: Get short SHA
@@ -116,7 +116,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: peercoin-${{ steps.slug.outputs.sha8 }}-${{ matrix.name }}
+          name: nowp-${{ steps.slug.outputs.sha8 }}-${{ matrix.name }}
           path: |
             *.tar.gz
             *.zip
@@ -132,7 +132,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: peercoin/packaging
+          repository: nowp/packaging
 
       - uses: actions/download-artifact@v3
         with:
@@ -142,9 +142,9 @@ jobs:
         working-directory: docker
         run: |
           mkdir -p linux/amd64 linux/arm/v7 linux/arm64
-          mv peercoin-*-x86_64-linux/peercoin-*-x86_64-linux-gnu.tar.gz linux/amd64/
-          mv peercoin-*-armhf-linux/peercoin-*-arm-linux-gnueabihf.tar.gz linux/arm/v7/
-          mv peercoin-*-aarch64-linux/peercoin-*-aarch64-linux-gnu.tar.gz linux/arm64/
+          mv nowp-*-x86_64-linux/nowp-*-x86_64-linux-gnu.tar.gz linux/amd64/
+          mv nowp-*-armhf-linux/nowp-*-arm-linux-gnueabihf.tar.gz linux/arm/v7/
+          mv nowp-*-aarch64-linux/nowp-*-aarch64-linux-gnu.tar.gz linux/arm64/
 
       - uses: docker/setup-qemu-action@v2
         with:
@@ -175,8 +175,8 @@ jobs:
           if [[ $GITHUB_REF == refs/tags/v* ]]; then
             PUSH=true
             TAG_NAME=${GITHUB_REF/refs\/tags\//}
-            TAG_NAME=${TAG_NAME/ppc\./}
-            TAG_NAME=${TAG_NAME/ppc/}
+            TAG_NAME=${TAG_NAME/nowp\./}
+            TAG_NAME=${TAG_NAME/nowp/}
             TAG_NAME=${TAG_NAME/v/}
           fi
           echo "push=${PUSH}" >> $GITHUB_OUTPUT
@@ -203,8 +203,8 @@ jobs:
           docker buildx build --platform linux/amd64,linux/arm/v7,linux/arm64 \
             --output "type=image,push=${{ steps.detect.outputs.push }}" \
             --progress=plain \
-            --tag peercoin/peercoind:${{ steps.detect.outputs.tag-name }} \
-            --tag ghcr.io/${{ github.repository }}/peercoind:${{ steps.detect.outputs.tag-name }} \
+            --tag nowp/nowpd:${{ steps.detect.outputs.tag-name }} \
+            --tag ghcr.io/${{ github.repository }}/nowpd:${{ steps.detect.outputs.tag-name }} \
           .
   appimage:
     runs-on: ubuntu-20.04
@@ -231,7 +231,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: peercoin/packaging
+          repository: nowp/packaging
 
       - uses: actions/download-artifact@v3
         with:
@@ -250,8 +250,8 @@ jobs:
           TAG_NAME=$SHA8
           if [[ $GITHUB_REF == refs/tags/v* ]]; then
             TAG_NAME=${GITHUB_REF/refs\/tags\//}
-            TAG_NAME=${TAG_NAME/ppc\./}
-            TAG_NAME=${TAG_NAME/ppc/}
+            TAG_NAME=${TAG_NAME/nowp\./}
+            TAG_NAME=${TAG_NAME/nowp/}
             TAG_NAME=${TAG_NAME/v/}
           fi
           echo "sha8=$SHA8" >> $GITHUB_OUTPUT
@@ -261,14 +261,14 @@ jobs:
       - name: Build AppImage
         working-directory: appimage
         run: |
-          tar xzf peercoin-${{ steps.detect.outputs.sha8 }}-${{ matrix.name }}-linux/peercoin-*-${{ matrix.host }}.tar.gz -C AppDir --strip-components=1
-          find AppDir/bin ! -name 'peercoin-qt' -type f -exec rm -f {} +
+          tar xzf nowp-${{ steps.detect.outputs.sha8 }}-${{ matrix.name }}-linux/nowp-*-${{ matrix.host }}.tar.gz -C AppDir --strip-components=1
+          find AppDir/bin ! -name 'nowp-qt' -type f -exec rm -f {} +
           VERSION=${{ steps.detect.outputs.tag-name }} SOURCES_REPO=${{ matrix.sources_repo }} APT_ARCH=${{ matrix.apt_arch }} BUILD_ARCH=${{ matrix.name }} appimage-builder --skip-tests
           mv *.AppImage ${{ steps.detect.outputs.build-dir }}/
 
       - uses: actions/upload-artifact@v3
         with:
-          name: peercoin-appimage-${{ steps.detect.outputs.tag-name }}-${{ matrix.name }}
+          name: nowp-appimage-${{ steps.detect.outputs.tag-name }}-${{ matrix.name }}
           path: |
             *.AppImage
           retention-days: 5
@@ -289,8 +289,8 @@ jobs:
           fi
           if [[ $GITHUB_REF == refs/tags/v* ]]; then
             TAG_NAME=${GITHUB_REF/refs\/tags\//}
-            TAG_NAME_NO_DOT=${TAG_NAME/ppc\./}
-            RELEASE_TITLE="Release ${TAG_NAME_NO_DOT/ppc/}"
+            TAG_NAME_NO_DOT=${TAG_NAME/nowp\./}
+            RELEASE_TITLE="Release ${TAG_NAME_NO_DOT/nowp/}"
           fi
           if [[ -z "${{ secrets.GPG_PRIVATE_KEY }}" ]]; then
             TAG_NAME=noop
@@ -331,11 +331,11 @@ jobs:
         run: |
           rm -rf ${{ steps.detect.outputs.tag-name }}/*
           mkdir -p ${{ steps.detect.outputs.tag-name }}
-          mv peercoin-*-**/peercoin-*.tar.gz \
-            peercoin-*-**/peercoin-*.zip \
-            peercoin-*-**/peercoin-*.exe \
-            peercoin-*-**/peercoin-*.dmg \
-            peercoin-*-**/*.AppImage* \
+          mv nowp-*-**/nowp-*.tar.gz \
+            nowp-*-**/nowp-*.zip \
+            nowp-*-**/nowp-*.exe \
+            nowp-*-**/nowp-*.dmg \
+            nowp-*-**/*.AppImage* \
           ${{ steps.detect.outputs.tag-name }}/
           cd ${{ steps.detect.outputs.tag-name }}
           sha256sum * > SHA256SUMS
@@ -343,7 +343,7 @@ jobs:
           rm SHA256SUMS
           cd -
           mktorrent -w ${{ github.server_url }}/${{ github.repository }}/releases/download \
-            -o ${{ steps.detect.outputs.tag-name }}/peercoin-${{ steps.detect.outputs.tag-name }}.torrent \
+            -o ${{ steps.detect.outputs.tag-name }}/nowp-${{ steps.detect.outputs.tag-name }}.torrent \
             -a udp://tracker.opentrackr.org:1337/announce \
             -a udp://tracker.openbittorrent.com:6969/announce \
             -a udp://exodus.desync.com:6969/announce \

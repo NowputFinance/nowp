@@ -118,7 +118,7 @@ std::map<CNetAddr, LocalServiceInfo> mapLocalHost GUARDED_BY(g_maplocalhost_mute
 static bool vfLimited[NET_MAX] GUARDED_BY(g_maplocalhost_mutex) = {};
 std::string strSubVersion;
 
-// peercoin: temperature to measure how many PoS headers have been sent by this client
+// nowp: temperature to measure how many PoS headers have been sent by this client
 std::map<CNetAddr, int32_t> mapPoSTemperature;
 std::set<std::pair<COutPoint, unsigned int>> setStakeSeen;
 

@@ -5,6 +5,7 @@
 
 #include <primitives/block.h>
 
+#include <util/strencodings.h>
 #include <hash.h>
 #include <tinyformat.h>
 
@@ -13,6 +14,11 @@ uint256 CBlockHeader::GetHash() const
     CBlockHeader tmp(*this);
     tmp.nFlags = 0;
     return SerializeHash(tmp);
+}
+
+uint256 CBlockHeader::GetPOWHash() const
+{
+	return HashGR(BEGIN(nVersion), END(nNonce), hashPrevBlock);
 }
 
 std::string CBlock::ToString() const

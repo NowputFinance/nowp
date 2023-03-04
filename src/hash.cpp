@@ -95,11 +95,11 @@ CHashWriter TaggedHash(const std::string& tag)
     return writer;
 }
 
-int32_t peercoinRandseed;
+int32_t nowpRandseed;
 int univHash(const uint256 &x) {
-  int h = peercoinRandseed >> 20;
+  int h = nowpRandseed >> 20;
   const uint32_t *p = x.GetDataPtr();
   for(int i = 0; i < 8; i++)
-    h ^=  (p[i] >> (h & 0xf)) + (peercoinRandseed >> i);
+    h ^=  (p[i] >> (h & 0xf)) + (nowpRandseed >> i);
   return (h + (h >> 16))  & 1023; // 2^n - 1
 }

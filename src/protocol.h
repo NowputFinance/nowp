@@ -511,7 +511,7 @@ public:
 /** Convert a TX/WITNESS_TX/WTX CInv to a GenTxid. */
 GenTxid ToGenTxid(const CInv& inv);
 
-/** peercoin: How much temperature a PoW header will remove */
+/** nowp: How much temperature a PoW header will remove */
 extern const unsigned int POW_HEADER_COOLING;
 
 #endif // BITCOIN_PROTOCOL_H

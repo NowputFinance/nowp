@@ -99,14 +99,14 @@ static int AppInitRawTx(int argc, char* argv[])
 
     if (argc < 2 || HelpRequested(gArgs) || gArgs.IsArgSet("-version")) {
         // First part of help message is specific to this utility
-        std::string strUsage = PACKAGE_NAME " peercoin-tx utility version " + FormatFullVersion() + "\n";
+        std::string strUsage = PACKAGE_NAME " nowp-tx utility version " + FormatFullVersion() + "\n";
 
         if (gArgs.IsArgSet("-version")) {
             strUsage += FormatParagraph(LicenseInfo());
         } else {
             strUsage += "\n"
-                "Usage:  peercoin-tx [options] <hex-tx> [commands]  Update hex-encoded peercoin transaction\n"
-                "or:     peercoin-tx [options] -create [commands]   Create hex-encoded peercoin transaction\n"
+                "Usage:  nowp-tx [options] <hex-tx> [commands]  Update hex-encoded nowp transaction\n"
+                "or:     nowp-tx [options] -create [commands]   Create hex-encoded nowp transaction\n"
                 "\n";
             strUsage += gArgs.GetHelpMessage();
         }

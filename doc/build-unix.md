@@ -1,12 +1,12 @@
 UNIX BUILD NOTES
 ====================
-Some notes on how to build Peercoin in Unix.
+Some notes on how to build Nowp in Unix.
 
 (For BSD specific instructions, see `build-*bsd.md` in this directory.)
 
 Note
 ---------------------
-Always use absolute paths to configure and compile Peercoin and the dependencies,
+Always use absolute paths to configure and compile Nowp and the dependencies,
 For example, when specifying the path of the dependency:
 
     ../dist/configure --enable-cxx --disable-shared --with-pic --prefix=$BDB_PREFIX
@@ -24,7 +24,7 @@ make # use "-j N" for N parallel jobs
 make install # optional
 ```
 
-This will build peercoin-qt as well, if the dependencies are met.
+This will build nowp-qt as well, if the dependencies are met.
 
 Dependencies
 ---------------------
@@ -56,7 +56,7 @@ Memory Requirements
 --------------------
 
 C++ compilers are memory-hungry. It is recommended to have at least 1.5 GB of
-memory available when compiling Peercoin. On systems with less, gcc can be
+memory available when compiling Nowp. On systems with less, gcc can be
 tuned to conserve memory with additional CXXFLAGS:
 
 
@@ -109,7 +109,7 @@ User-Space, Statically Defined Tracing (USDT) dependencies:
 
 GUI dependencies:
 
-If you want to build Peercoin-Qt, make sure that the required packages for Qt development
+If you want to build Nowp-Qt, make sure that the required packages for Qt development
 are installed. Qt 5 is necessary to build the GUI.
 To build without GUI pass `--without-gui`.
 
@@ -125,7 +125,7 @@ libqrencode (optional) can be installed with:
 
     sudo apt-get install libqrencode-dev
 
-Once these are installed, they will be found by configure and a peercoin-qt executable will be
+Once these are installed, they will be found by configure and a nowp-qt executable will be
 built by default.
 
 
@@ -191,7 +191,7 @@ built by default.
 
 Notes
 -----
-The release is built with GCC and then "strip peercoind" to strip the debug
+The release is built with GCC and then "strip nowpd" to strip the debug
 symbols, which reduces the executable size by about 90%.
 
 miniupnpc
@@ -236,7 +236,7 @@ Otherwise, you can build Bitcoin Core from self-compiled [depends](/depends/READ
 
 Security
 --------
-To help make your peercoin installation more secure by making certain attacks impossible to
+To help make your nowp installation more secure by making certain attacks impossible to
 exploit even if a vulnerability is found, binaries are hardened by default.
 This can be disabled with:
 
@@ -258,7 +258,7 @@ Hardening enables the following features:
 
     To test that you have built PIE executable, install scanelf, part of paxutils, and use:
 
-    	scanelf -e ./peercoin
+    	scanelf -e ./nowp
 
     The output should contain:
 
@@ -266,13 +266,13 @@ Hardening enables the following features:
     ET_DYN
 
 * _Non-executable Stack_: If the stack is executable then trivial stack-based buffer overflow exploits are possible if
-    vulnerable buffers are found. By default, peercoin should be built with a non-executable stack
+    vulnerable buffers are found. By default, nowp should be built with a non-executable stack
     but if one of the libraries it uses asks for an executable stack or someone makes a mistake
     and uses a compiler extension which requires an executable stack, it will silently build an
     executable without the non-executable stack protection.
 
     To verify that the stack is non-executable after compiling use:
-    `scanelf -e ./peercoin`
+    `scanelf -e ./nowp`
 
     The output should contain:
     STK/REL/PTL
@@ -282,7 +282,7 @@ Hardening enables the following features:
 
 Disable-wallet mode
 --------------------
-When the intention is to run only a P2P node without a wallet, peercoin may be compiled in
+When the intention is to run only a P2P node without a wallet, nowp may be compiled in
 disable-wallet mode with:
 
     ./configure --disable-wallet
@@ -304,8 +304,8 @@ Setup and Build Example: Arch Linux
 This example lists the steps necessary to setup and build a command line only, non-wallet distribution of the latest changes on Arch Linux:
 
     pacman -S git base-devel boost libevent python
-    git clone https://github.com/peercoin/peercoin.git
-    cd peercoin/
+    git clone https://github.com/nowp/nowp.git
+    cd nowp/
     ./autogen.sh
     ./configure --disable-wallet --without-gui --without-miniupnpc
     make check
@@ -314,7 +314,7 @@ Note:
 Enabling wallet support requires either compiling against a Berkeley DB newer than 4.8 (package `db`) using `--with-incompatible-bdb`,
 or building and depending on a local version of Berkeley DB 4.8. The readily available Arch Linux packages are currently built using
 `--with-incompatible-bdb` according to the [PKGBUILD](https://github.com/archlinux/svntogit-community/blob/packages/bitcoin/trunk/PKGBUILD).
-As mentioned above, when maintaining portability of the wallet between the standard Peercoin distributions and independently built
+As mentioned above, when maintaining portability of the wallet between the standard Nowp distributions and independently built
 node software is desired, Berkeley DB 4.8 must be used.
 
 

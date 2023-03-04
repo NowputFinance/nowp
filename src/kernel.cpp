@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2023 The Peercoin developers
+// Copyright (c) 2012-2023 The Nowp developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -485,7 +485,7 @@ static bool GetKernelStakeModifier(CBlockIndex* pindexPrev, uint256 hashBlockFro
         return GetKernelStakeModifierV03(pindexPrev, hashBlockFrom, nStakeModifier, nStakeModifierHeight, nStakeModifierTime, fPrintProofOfStake, chainstate);
 }
 
-// peercoin kernel protocol
+// nowp kernel protocol
 // coinstake must meet hash target according to the protocol:
 // kernel (input 0) must meet the formula
 //     hash(nStakeModifier + txPrev.block.nTime + txPrev.offset + txPrev.nTime + txPrev.vout.n + nTime) < bnTarget * nCoinDayWeight
@@ -700,7 +700,7 @@ unsigned int HowSuperMajority(int minVersion, const CBlockIndex* pstart, unsigne
     return nFound;
 }
 
-// peercoin: entropy bit for stake modifier if chosen by modifier
+// nowp: entropy bit for stake modifier if chosen by modifier
 unsigned int GetStakeEntropyBit(const CBlock& block)
 {
     unsigned int nEntropyBit = 0;

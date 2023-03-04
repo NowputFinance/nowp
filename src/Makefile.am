@@ -30,7 +30,7 @@ if ENABLE_ZMQ
 LIBBITCOIN_ZMQ=libbitcoin_zmq.a
 endif
 if BUILD_BITCOIN_LIBS
-LIBBITCOINCONSENSUS=libpeercoinconsensus.la
+LIBBITCOINCONSENSUS=libnowpconsensus.la
 endif
 if ENABLE_WALLET
 LIBBITCOIN_WALLET=libbitcoin_wallet.a
@@ -81,29 +81,29 @@ TESTS =
 BENCHMARKS =
 
 if BUILD_BITCOIND
-  bin_PROGRAMS += peercoind
+  bin_PROGRAMS += nowpd
 endif
 
 if BUILD_BITCOIN_NODE
-  bin_PROGRAMS += peercoin-node
+  bin_PROGRAMS += nowp-node
 endif
 
 if BUILD_BITCOIN_CLI
-  bin_PROGRAMS += peercoin-cli
+  bin_PROGRAMS += nowp-cli
 endif
 
 if BUILD_BITCOIN_TX
-  bin_PROGRAMS += peercoin-tx
+  bin_PROGRAMS += nowp-tx
 endif
 
 if ENABLE_WALLET
 if BUILD_BITCOIN_WALLET
-  bin_PROGRAMS += peercoin-wallet
+  bin_PROGRAMS += nowp-wallet
 endif
 endif
 
 if BUILD_BITCOIN_UTIL
-  bin_PROGRAMS += peercoin-util
+  bin_PROGRAMS += nowp-util
 endif
 
 .PHONY: FORCE check-symbols check-security
@@ -300,7 +300,7 @@ BITCOIN_CORE_H = \
   zmq/zmqpublishnotifier.h \
   zmq/zmqrpc.h \
   zmq/zmqutil.h \
-## --- peercoin headers start from this line --- ##
+## --- nowp headers start from this line --- ##
   kernel.h \
   kernelrecord.h
 
@@ -396,7 +396,7 @@ libbitcoin_zmq_a_SOURCES = \
 endif
 
 
-# wallet: shared between peercoind and peercoin-qt, but only linked
+# wallet: shared between nowpd and nowp-qt, but only linked
 # when wallet enabled
 libbitcoin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(SQLITE_CFLAGS)
 libbitcoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
@@ -465,16 +465,78 @@ crypto_libbitcoin_crypto_base_a_SOURCES = \
   crypto/muhash.cpp \
   crypto/ripemd160.cpp \
   crypto/ripemd160.h \
+  crypto/aes_helper.c \
+  crypto/blake.c \
+  crypto/bmw.c \
+  crypto/cubehash.c \
+  crypto/echo.c \
+  crypto/groestl.c \
+  crypto/jh.c \
+  crypto/keccak.c \
+  crypto/luffa.c \
+  crypto/shavite.c \
+  crypto/simd.c \
+  crypto/skein.c \
+  crypto/sph_hamsi.c \
+  crypto/sph_hamsi_helper.c \
+  crypto/sph_fugue.c \
+  crypto/sph_shabal.c \
+  crypto/sph_whirlpool.c \
+  crypto/sph_sha2.c \
+  crypto/sph_sha512.c \
   crypto/sha1.cpp \
   crypto/sha1.h \
   crypto/sha256.cpp \
   crypto/sha256.h \
   crypto/sha3.cpp \
   crypto/sha3.h \
-  crypto/sha512.cpp \
-  crypto/sha512.h \
+  crypto/sph_blake.h \
+  crypto/sph_bmw.h \
+  crypto/sph_cubehash.h \
+  crypto/sph_echo.h \
+  crypto/sph_groestl.h \
+  crypto/sph_jh.h \
+  crypto/sph_keccak.h \
+  crypto/sph_luffa.h \
+  crypto/sph_shavite.h \
+  crypto/sph_simd.h \
+  crypto/sph_skein.h \
+  crypto/sph_hamsi.h \
+  crypto/sph_fugue.h \
+  crypto/sph_shabal.h \
+  crypto/sph_whirlpool.h \
+  crypto/sph_sha2.h \
+  crypto/sph_types.h \
   crypto/siphash.cpp \
-  crypto/siphash.h
+  crypto/siphash.h \
+  cryptonote/aesb.c \
+  cryptonote/c_blake256.c \
+  cryptonote/c_groestl.c \
+  cryptonote/c_jh.c \
+  cryptonote/c_keccak.c \
+  cryptonote/c_skein.c \
+  cryptonote/slow-hash.c \
+  cryptonote/hash-ops.c \
+  cryptonote/oaes_lib.c \
+  cryptonote/wild_keccak.cpp \
+  cryptonote/c_blake256.h \
+  cryptonote/c_groestl.h \
+  cryptonote/c_jh.h \
+  cryptonote/c_keccak.h \
+  cryptonote/crypto.h \
+  cryptonote/c_skein.h \
+  cryptonote/groestl_tables.h \
+  cryptonote/slow-hash.h \
+  cryptonote/int-util.h \
+  cryptonote/oaes_config.h \
+  cryptonote/hash-ops.h \
+  cryptonote/oaes_lib.h \
+  cryptonote/skein_port.h \
+  cryptonote/variant2_int_sqrt.h \
+  cryptonote/wild_keccak.h \
+  cryptonote/warnings.h \
+  crypto/sha512.cpp \
+  crypto/sha512.h
 
 if USE_ASM
 crypto_libbitcoin_crypto_base_a_SOURCES += crypto/sha256_sse4.cpp
@@ -516,6 +578,8 @@ libbitcoin_consensus_a_SOURCES = \
   consensus/params.h \
   consensus/tx_check.cpp \
   consensus/validation.h \
+  hash_selection.h \
+  hash_selection.cpp \
   hash.cpp \
   hash.h \
   prevector.h \
@@ -542,7 +606,7 @@ libbitcoin_consensus_a_SOURCES = \
   util/strencodings.h \
   version.h
 
-# common: shared between peercoind, and peercoin-qt and non-server tools
+# common: shared between nowpd, and nowp-qt and non-server tools
 libbitcoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_common_a_SOURCES = \
@@ -628,7 +692,7 @@ if USE_LIBEVENT
 libbitcoin_util_a_SOURCES += util/url.cpp
 endif
 
-# cli: shared between peercoin-cli and peercoin-qt
+# cli: shared between nowp-cli and nowp-qt
 libbitcoin_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_cli_a_SOURCES = \
@@ -665,66 +729,66 @@ bitcoin_bin_ldadd = \
 
 bitcoin_bin_ldadd += $(BDB_LIBS) $(MINIUPNPC_LIBS) $(NATPMP_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(SQLITE_LIBS) $(CRYPTO_LIBS)
 
-peercoind_SOURCES = $(bitcoin_daemon_sources) init/bitcoind.cpp
-peercoind_CPPFLAGS = $(bitcoin_bin_cppflags)
-peercoind_CXXFLAGS = $(bitcoin_bin_cxxflags)
-peercoind_LDFLAGS = $(bitcoin_bin_ldflags)
-peercoind_LDADD = $(LIBBITCOIN_NODE) $(bitcoin_bin_ldadd)
+nowpd_SOURCES = $(bitcoin_daemon_sources) init/bitcoind.cpp
+nowpd_CPPFLAGS = $(bitcoin_bin_cppflags)
+nowpd_CXXFLAGS = $(bitcoin_bin_cxxflags)
+nowpd_LDFLAGS = $(bitcoin_bin_ldflags)
+nowpd_LDADD = $(LIBBITCOIN_NODE) $(bitcoin_bin_ldadd)
 
-peercoin_node_SOURCES = $(bitcoin_daemon_sources) init/bitcoin-node.cpp
-peercoin_node_CPPFLAGS = $(bitcoin_bin_cppflags)
-peercoin_node_CXXFLAGS = $(bitcoin_bin_cxxflags)
-peercoin_node_LDFLAGS = $(bitcoin_bin_ldflags)
-peercoin_node_LDADD = $(LIBBITCOIN_NODE) $(bitcoin_bin_ldadd) $(LIBBITCOIN_IPC) $(LIBMULTIPROCESS_LIBS)
+nowp_node_SOURCES = $(bitcoin_daemon_sources) init/bitcoin-node.cpp
+nowp_node_CPPFLAGS = $(bitcoin_bin_cppflags)
+nowp_node_CXXFLAGS = $(bitcoin_bin_cxxflags)
+nowp_node_LDFLAGS = $(bitcoin_bin_ldflags)
+nowp_node_LDADD = $(LIBBITCOIN_NODE) $(bitcoin_bin_ldadd) $(LIBBITCOIN_IPC) $(LIBMULTIPROCESS_LIBS)
 
-# peercoin-cli binary #
-peercoin_cli_SOURCES = bitcoin-cli.cpp
-peercoin_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
-peercoin_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-peercoin_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
+# nowp-cli binary #
+nowp_cli_SOURCES = bitcoin-cli.cpp
+nowp_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
+nowp_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+nowp_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
 
 if TARGET_WINDOWS
-peercoin_cli_SOURCES += bitcoin-cli-res.rc
+nowp_cli_SOURCES += bitcoin-cli-res.rc
 endif
 
-peercoin_cli_LDADD = \
+nowp_cli_LDADD = \
   $(LIBBITCOIN_CLI) \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO)
 
-peercoin_cli_LDADD += $(CRYPTO_LIBS) $(EVENT_LIBS)
+nowp_cli_LDADD += $(CRYPTO_LIBS) $(EVENT_LIBS)
 #
 
-# peercoin-tx binary #
-peercoin_tx_SOURCES = \
+# nowp-tx binary #
+nowp_tx_SOURCES = \
   bitcoin-tx.cpp \
   timedatadummy.cpp
-peercoin_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-peercoin_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-peercoin_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
+nowp_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+nowp_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+nowp_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
 
 if TARGET_WINDOWS
-peercoin_tx_SOURCES += bitcoin-tx-res.rc
+nowp_tx_SOURCES += bitcoin-tx-res.rc
 endif
 
-peercoin_tx_LDADD = \
+nowp_tx_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CONSENSUS) \
   $(LIBBITCOIN_CRYPTO) \
   $(LIBSECP256K1)
-peercoin_tx_LDADD += $(CRYPTO_LIBS)
+nowp_tx_LDADD += $(CRYPTO_LIBS)
 #
 
 # bitcoin-wallet binary #
-peercoin_wallet_SOURCES = bitcoin-wallet.cpp
-peercoin_wallet_SOURCES += init/bitcoin-wallet.cpp
-peercoin_wallet_CPPFLAGS = $(bitcoin_bin_cppflags)
-peercoin_wallet_CXXFLAGS = $(bitcoin_bin_cxxflags)
-peercoin_wallet_LDFLAGS = $(bitcoin_bin_ldflags)
-peercoin_wallet_LDADD = \
+nowp_wallet_SOURCES = bitcoin-wallet.cpp
+nowp_wallet_SOURCES += init/bitcoin-wallet.cpp
+nowp_wallet_CPPFLAGS = $(bitcoin_bin_cppflags)
+nowp_wallet_CXXFLAGS = $(bitcoin_bin_cxxflags)
+nowp_wallet_LDFLAGS = $(bitcoin_bin_ldflags)
+nowp_wallet_LDADD = \
   $(LIBBITCOIN_WALLET_TOOL) \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_NODE) \
@@ -743,21 +807,21 @@ peercoin_wallet_LDADD = \
   $(CRYPTO_LIBS)
 
 if TARGET_WINDOWS
-peercoin_wallet_SOURCES += bitcoin-wallet-res.rc
+nowp_wallet_SOURCES += bitcoin-wallet-res.rc
 endif
 #
 
 # bitcoin-util binary #
-peercoin_util_SOURCES = bitcoin-util.cpp
-peercoin_util_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-peercoin_util_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-peercoin_util_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
+nowp_util_SOURCES = bitcoin-util.cpp
+nowp_util_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+nowp_util_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+nowp_util_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
 
 if TARGET_WINDOWS
-peercoin_util_SOURCES += bitcoin-util-res.rc
+nowp_util_SOURCES += bitcoin-util-res.rc
 endif
 
-peercoin_util_LDADD = \
+nowp_util_LDADD = \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \
   $(LIBUNIVALUE) \
@@ -766,15 +830,15 @@ peercoin_util_LDADD = \
   $(LIBSECP256K1)
 #
 
-# peercoinconsensus library #
+# nowpconsensus library #
 if BUILD_BITCOIN_LIBS
 include_HEADERS = script/bitcoinconsensus.h
-libpeercoinconsensus_la_SOURCES = support/cleanse.cpp $(crypto_libbitcoin_crypto_base_a_SOURCES) $(libbitcoin_consensus_a_SOURCES)
+libnowpconsensus_la_SOURCES = support/cleanse.cpp $(crypto_libbitcoin_crypto_base_a_SOURCES) $(libbitcoin_consensus_a_SOURCES)
 
-libpeercoinconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
-libpeercoinconsensus_la_LIBADD = $(LIBSECP256K1)
-libpeercoinconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL
-libpeercoinconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libnowpconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
+libnowpconsensus_la_LIBADD = $(LIBSECP256K1)
+libnowpconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL
+libnowpconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
 endif
 #

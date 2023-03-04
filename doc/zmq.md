@@ -5,8 +5,8 @@ connections, inter-process communication, and shared-memory,
 providing various message-oriented semantics such as publish/subscribe,
 request/reply, and push/pull.
 
-The Peercoin daemon can be configured to act as a trusted "border
-router", implementing the peercoin wire protocol and relay, making
+The Nowp daemon can be configured to act as a trusted "border
+router", implementing the nowp wire protocol and relay, making
 consensus decisions, maintaining the local blockchain database,
 broadcasting locally generated transactions into the network, and
 providing a queryable RPC interface to interact on a polled basis for
@@ -33,7 +33,7 @@ buffering or reassembly.
 
 ## Prerequisites
 
-The ZeroMQ feature in Peercoin requires the ZeroMQ API >= 4.0.0
+The ZeroMQ feature in Nowp requires the ZeroMQ API >= 4.0.0
 [libzmq](https://github.com/zeromq/libzmq/releases).
 For version information, see [dependencies.md](dependencies.md).
 Typically, it is packaged by distributions as something like
@@ -48,7 +48,7 @@ operation.
 
 By default, the ZeroMQ feature is automatically compiled in if the
 necessary prerequisites are found.  To disable, use --disable-zmq
-during the *configure* step of building peercoind:
+during the *configure* step of building nowpd:
 
     $ ./configure --disable-zmq (other options)
 
@@ -82,7 +82,7 @@ The high water mark value must be an integer greater than or equal to 0.
 
 For instance:
 
-    $ peercoind -zmqpubhashtx=tcp://127.0.0.1:28332 \
+    $ nowpd -zmqpubhashtx=tcp://127.0.0.1:28332 \
                -zmqpubhashtx=tcp://192.168.1.2:28332 \
                -zmqpubhashblock="tcp://[::1]:28333" \
                -zmqpubhashtxhwm=10000
@@ -149,9 +149,9 @@ hosts as well. If needed, this option has to be set on the client side too.
 
 ## Remarks
 
-From the perspective of peercoind, the ZeroMQ socket is write-only; PUB
+From the perspective of nowpd, the ZeroMQ socket is write-only; PUB
 sockets don't even have a read function. Thus, there is no state
-introduced into peercoind directly. Furthermore, no information is
+introduced into nowpd directly. Furthermore, no information is
 broadcast that wasn't already received from the public P2P network.
 
 No authentication or authorization is done on connecting clients; it
@@ -168,7 +168,7 @@ disconnections.
 
 There are several possibilities that ZMQ notification can get lost
 during transmission depending on the communication type you are
-using. Peercoind appends an up-counting sequence number to each
+using. Nowpd appends an up-counting sequence number to each
 notification which allows listeners to detect lost notifications.
 
 The `sequence` topic refers specifically to the mempool sequence

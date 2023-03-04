@@ -287,7 +287,7 @@ public:
 
     //! Return pointer to internal wallet class, useful for testing.
     virtual wallet::CWallet* wallet() { return nullptr; }
-    // peercoin
+    // nowp
     virtual void relockWalletAfterDuration(int nDuration) = 0;
     virtual std::shared_ptr<wallet::CWallet> getWallet() = 0;
 };

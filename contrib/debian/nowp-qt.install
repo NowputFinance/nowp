@@ -1,0 +1,11 @@
+usr/local/bin/nowp-qt usr/bin
+share/pixmaps/nowp16.png usr/share/pixmaps
+share/pixmaps/nowp32.png usr/share/pixmaps
+share/pixmaps/nowp128.png usr/share/pixmaps
+share/pixmaps/nowp256.png usr/share/pixmaps
+share/pixmaps/nowp-testnet32.png usr/share/pixmaps
+share/pixmaps/nowp-testnet128.png usr/share/pixmaps
+share/pixmaps/nowp-testnet256.png usr/share/pixmaps
+debian/nowp-qt.desktop usr/share/applications
+debian/nowp-testnet-qt.desktop usr/share/applications
+debian/nowp-qt.protocol usr/share/kde4/services/

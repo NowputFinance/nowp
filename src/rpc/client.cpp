@@ -197,7 +197,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "addpeeraddress", 1, "port"},
     { "addpeeraddress", 2, "tried"},
     { "stop", 0, "wait" },
-    // peercoin:
+    // nowp:
     { "importcoinstake", 1, "timestamp" },
     { "listminting", 0, "count" },
     { "reservebalance", 0, "reserve" },

@@ -379,7 +379,7 @@
 <context>
     <name>Intro</name>
     <message>
-        <source>Peercoin</source>
+        <source>Nowp</source>
         <translation>Пиркойн</translation>
     </message>
     <message>

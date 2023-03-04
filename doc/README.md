@@ -1,40 +1,40 @@
-Peercoin
+Nowp
 
 Setup
 ---------------------
-Peercoin is the original Peercoin client and it builds the backbone of the network. It downloads and, by default, stores the entire history of Peercoin transactions (which is currently less than one gigabyte); depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more.
+Nowp is the original Nowp client and it builds the backbone of the network. It downloads and, by default, stores the entire history of Nowp transactions (which is currently less than one gigabyte); depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more.
 
-To download Peercoin, visit [peercoin.net](https://peercoin.net/download).
+To download Nowp, visit [nowp.net](https://nowp.net/download).
 
 Running
 ---------------------
-The following are some helpful notes on how to run Peercoin on your native platform.
+The following are some helpful notes on how to run Nowp on your native platform.
 
 ### Unix
 
 Unpack the files into a directory and run:
 
-- `bin/peercoin-qt` (GUI) or
-- `bin/peercoind` (headless)
+- `bin/nowp-qt` (GUI) or
+- `bin/nowpd` (headless)
 
 ### Windows
 
-Unpack the files into a directory, and then run peercoin-qt.exe.
+Unpack the files into a directory, and then run nowp-qt.exe.
 
 ### macOS
 
-Drag Peercoin to your applications folder, and then run Peercoin.
+Drag Nowp to your applications folder, and then run Nowp.
 
 ### Need Help?
 
-* See the documentation at the [Peercoin Wiki](https://docs.peercoin.net/)
+* See the documentation at the [Nowp Wiki](https://docs.nowp.net/)
 for help and more information.
-* Peercoin is very similar to bitcoin, so you can use their wiki [Bitcoin Wiki](https://en.bitcoin.it/wiki/Main_Page).
-* Ask for help on [#general](https://peercoin.chat/) on peercoin.chat.
+* Nowp is very similar to bitcoin, so you can use their wiki [Bitcoin Wiki](https://en.bitcoin.it/wiki/Main_Page).
+* Ask for help on [#general](https://nowp.chat/) on nowp.chat.
 
 Building
 ---------------------
-The following are developer notes on how to build Peercoin on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
+The following are developer notes on how to build Nowp on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
 
 - [Dependencies](dependencies.md)
 - [macOS Build Notes](build-osx.md)
@@ -47,7 +47,7 @@ The following are developer notes on how to build Peercoin on your native platfo
 
 Development
 ---------------------
-The Peercoin repo's [root README](/README.md) contains relevant information on the development process and automated testing.
+The Nowp repo's [root README](/README.md) contains relevant information on the development process and automated testing.
 
 - [Developer Notes](developer-notes.md)
 - [Productivity Notes](productivity.md)
@@ -64,7 +64,7 @@ The Peercoin repo's [root README](/README.md) contains relevant information on t
 - [Benchmarking](benchmarking.md)
 
 ### Resources
-* Discuss on the [Peercoin](https://talk.peercoin.net/) forums.
+* Discuss on the [Nowp](https://talk.nowp.net/) forums.
 
 ### Miscellaneous
 - [Assets Attribution](assets-attribution.md)

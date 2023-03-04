@@ -1,7 +1,7 @@
 Translation Strings Policy
 ===========================
 
-This document provides guidelines for internationalization of the Peercoin software.
+This document provides guidelines for internationalization of the Nowp software.
 
 How to translate?
 ------------------

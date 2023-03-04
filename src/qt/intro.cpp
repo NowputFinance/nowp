@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2021 The Bitcoin Core developers
-// Copyright (c) 2017-2023 The Peercoin developers
+// Copyright (c) 2017-2023 The Nowp developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -125,7 +125,7 @@ Intro::Intro(QWidget *parent, int64_t blockchain_size_gb) :
         .arg(PACKAGE_NAME)
         .arg(m_blockchain_size_gb)
         .arg(2012)
-        .arg(tr("Peercoin"))
+        .arg(tr("Nowp"))
     );
     ui->lblExplanation2->setText(ui->lblExplanation2->text().arg(PACKAGE_NAME));
 

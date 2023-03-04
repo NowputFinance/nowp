@@ -42,7 +42,7 @@ bilingual_str GetWarnings(bool verbose)
         warnings_verbose.emplace_back(warnings_concise);
     }
 
-    // peercoin: wallet lock warning for minting
+    // nowp: wallet lock warning for minting
     if (strMintWarning != "")
     {
         warnings_concise = Untranslated(strMintWarning);

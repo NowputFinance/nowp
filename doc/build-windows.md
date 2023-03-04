@@ -1,9 +1,9 @@
 WINDOWS BUILD NOTES
 ====================
 
-Below are some notes on how to build Peercoin for Windows.
+Below are some notes on how to build Nowp for Windows.
 
-The options known to work for building Peercoin on Windows are:
+The options known to work for building Nowp on Windows are:
 
 * On Linux, using the [Mingw-w64](https://www.mingw-w64.org/) cross compiler tool chain.
 * On Windows, using [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/windows/wsl/about) and Mingw-w64.
@@ -62,8 +62,8 @@ sudo apt install g++-mingw-w64-x86-64
 
 Once the toolchain is installed the build steps are common:
 
-Note that for WSL the Peercoin source path MUST be somewhere in the default mount file system, for
-example /usr/src/peercoin, AND not under /mnt/d/. If this is not the case the dependency autoconf scripts will fail.
+Note that for WSL the Nowp source path MUST be somewhere in the default mount file system, for
+example /usr/src/nowp, AND not under /mnt/d/. If this is not the case the dependency autoconf scripts will fail.
 This means you cannot use a directory that is located directly on the host Windows file system to perform the build.
 
 Additional WSL Note: WSL support for [launching Win32 applications](https://docs.microsoft.com/en-us/archive/blogs/wsl/windows-and-ubuntu-interoperability#launching-win32-applications-from-within-wsl)
@@ -93,9 +93,9 @@ Installation
 After building using the Windows subsystem it can be useful to copy the compiled
 executables to a directory on the Windows drive in the same directory structure
 as they appear in the release `.zip` archive. This can be done in the following
-way. This will install to `c:\workspace\peercoin`, for example:
+way. This will install to `c:\workspace\nowp`, for example:
 
-    make install DESTDIR=/mnt/c/workspace/peercoin
+    make install DESTDIR=/mnt/c/workspace/nowp
 
 You can also create an installer using:
 

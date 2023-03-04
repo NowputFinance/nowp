@@ -1,8 +1,8 @@
-// Copyright (c) 2012-2023 The Peercoin developers
+// Copyright (c) 2012-2023 The Nowp developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#ifndef PEERCOIN_KERNEL_H
-#define PEERCOIN_KERNEL_H
+#ifndef NOWP_KERNEL_H
+#define NOWP_KERNEL_H
 
 #include <primitives/transaction.h> // CTransaction(Ref)
 
@@ -61,11 +61,11 @@ unsigned int GetStakeModifierChecksum(const CBlockIndex* pindex);
 // Check stake modifier hard checkpoints
 bool CheckStakeModifierCheckpoints(int nHeight, unsigned int nStakeModifierChecksum);
 
-// peercoin: block version supermajority calculation
+// nowp: block version supermajority calculation
 bool IsSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned int nRequired, unsigned int nToCheck);
 unsigned int HowSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned int nRequired, unsigned int nToCheck);
 
-// peercoin: entropy bit for stake modifier if chosen by modifier
+// nowp: entropy bit for stake modifier if chosen by modifier
 unsigned int GetStakeEntropyBit(const CBlock& block);
 
-#endif // PEERCOIN_KERNEL_H
+#endif // NOWP_KERNEL_H

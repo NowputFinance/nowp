@@ -102,7 +102,7 @@ RPCHelpMan walletpassphrase()
         }
     }, nSleepTime);
 
-    // peercoin: if user OS account compromised prevent trivial sendmoney commands
+    // nowp: if user OS account compromised prevent trivial sendmoney commands
     if (request.params.size() > 2)
         fWalletUnlockMintOnly = request.params[2].get_bool();
     else

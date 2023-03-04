@@ -82,7 +82,7 @@ enum RPCErrorCode
     RPC_WALLET_ALREADY_LOADED       = -35, //!< This same wallet is already loaded
     RPC_WALLET_ALREADY_EXISTS       = -36, //!< There is already a wallet with the same name
 
-    //! peercoin
+    //! nowp
     RPC_INSUFFICIENT_SEND_AMOUNT    = -101, //! Transaction output is below minimum
     //! Backwards compatible aliases
     RPC_WALLET_INVALID_ACCOUNT_NAME = RPC_WALLET_INVALID_LABEL_NAME,

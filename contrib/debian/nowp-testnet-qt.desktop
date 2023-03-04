@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Nowp (testnet)
+Comment=Desktop allet for Nowp Cryptocurrency (testnet)
+Comment[de]=Offizieller Client für die Kryptowährung Nowp (testnet)
+Exec=nowp-qt -testnet %u
+Terminal=false
+Type=Application
+Icon=/usr/share/pixmaps/nowp-testnet128.png
+MimeType=x-scheme-handler/nowp;
+Categories=Application;Network;
