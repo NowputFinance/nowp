@@ -60,7 +60,7 @@ static CBlock CreateGenesisBlock(uint32_t nTimeTx, uint32_t nTimeBlock, uint32_t
 
 static void FindGenesisBlock(uint32_t nTimeTx, uint32_t nTimeBlock, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const char* network)
 {
-    CBlock block = CreateGenesisBlock(nTimeTx, nTimeBlock, 0, nBits, nVersion, 5000 * COIN);
+    CBlock block = CreateGenesisBlock(nTimeTx, nTimeBlock, 0, nBits, nVersion, 50 * COIN);
 
     arith_uint256 bnTarget;
     bnTarget.SetCompact(block.nBits);
@@ -101,8 +101,8 @@ public:
         //consensus.BIP16Height = 0;
         consensus.BIP34Height = 339994;
         consensus.BIP34Hash = uint256S("000000000000000237f50af4cfe8924e8693abc5bd8ae5abb95bc6d230f5953f");
-        consensus.powLimit =            uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~arith_uint256(0) >> 32;
-        consensus.bnInitialHashTarget = uint256S("0000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~arith_uint256(0) >> 40;
+        consensus.powLimit =            uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~arith_uint256(0) >> 32;
+        consensus.bnInitialHashTarget = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~arith_uint256(0) >> 40;
 
         consensus.nTargetTimespan = 24 * 60 * 60;  // one day
         consensus.nStakeTargetSpacing = 2 * 60; // 2-minute block spacing
@@ -139,11 +139,11 @@ public:
         nPruneAfterHeight = 100000;
         m_assumed_blockchain_size = 1;
 
-        genesis = CreateGenesisBlock(1677514510, 1677514510, 144, 0x20001fff, 4, 5000 * COIN);
+        genesis = CreateGenesisBlock(1677514510, 1677514510, 1689, 0x20001fff, 4, 50 * COIN);
         //FindGenesisBlock(1677514510, 1677514510, 0, 0x20001fff, 4, "main");
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x058aa039e4614d8bc3000578b2850a11109a91f5fdec96c3dda3c77ef4920a0b"));
-        assert(genesis.hashMerkleRoot == uint256S("0xaf3f6bed01abdc4691ec7cee7bad46086aafa148cfacb3645e6f80d9432f0199"));
+        assert(consensus.hashGenesisBlock == uint256S("0x786b663039ab29765f364656c1c349bebf0fd3ce4932455aa4a6672472450c73"));
+        assert(genesis.hashMerkleRoot == uint256S("0x3ba61c3470c0d8f0ce851359df4378d8dc3e32b7f7a8e35176e6ee3698bd2a17"));
 
         // Note that of those which support the service bits prefix, most only support a subset of
         // possible options.
@@ -174,7 +174,7 @@ public:
 
         checkpointData = {
             {
-                {     0, uint256S("0x058aa039e4614d8bc3000578b2850a11109a91f5fdec96c3dda3c77ef4920a0b")},
+                {     0, uint256S("0x786b663039ab29765f364656c1c349bebf0fd3ce4932455aa4a6672472450c73")},
             }
         };
 
