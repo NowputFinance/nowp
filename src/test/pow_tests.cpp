@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(get_next_work)
     pindexLast.nTime = 1345400851;
     pindexLast.nBits = 0x1c00ff4a;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, &block, chainParams->GetConsensus()), 0x1c00fee3);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, chainParams->GetConsensus()), 0x1c00fee3);
 }
 
 /* Test the target before v9 */
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_beforev9)
     pindexLast.nTime = 1581334400;
     pindexLast.nBits = 0x1c00ff4a;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, &block, chainParams->GetConsensus()), 0x1c00fecc);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, chainParams->GetConsensus()), 0x1c00fecc);
 }
 
 BOOST_AUTO_TEST_CASE(get_next_work_beforev9pos)
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_beforev9pos)
     pindexLast.nTime = 1581334441;
     pindexLast.nBits = 0x1c00ff4a;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, &block, chainParams->GetConsensus()), 0x1c00fe4b);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, chainParams->GetConsensus()), 0x1c00fe4b);
 }
 
 BOOST_AUTO_TEST_CASE(get_next_work_beforev9pos2)
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_beforev9pos2)
     pindexLast.nTime = 1581334442;
     pindexLast.nBits = 0x1c00ff4a;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, &block, chainParams->GetConsensus()), 0x1c00fdca);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, chainParams->GetConsensus()), 0x1c00fdca);
 }
 
 
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_afterv9)
     pindexLast.nBits = 0x1c00ff4a;
 
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, &block, chainParams->GetConsensus()), 0x1c00fc48);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, chainParams->GetConsensus()), 0x1c00fc48);
 }
 
 BOOST_AUTO_TEST_CASE(get_next_work_afterv9pos)
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_afterv9pos)
     pindexLast.nTime = 1598334441;
     pindexLast.nBits = 0x1c00ff4a;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, &block, chainParams->GetConsensus()), 0x1c00fc48);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, chainParams->GetConsensus()), 0x1c00fc48);
 }
 
 BOOST_AUTO_TEST_CASE(get_next_work_afterv9pos2)
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_afterv9pos2)
     pindexLast.nTime = 1598334442;
     pindexLast.nBits = 0x1c00ff4a;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, &block, chainParams->GetConsensus()), 0x1c00fc48);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, chainParams->GetConsensus()), 0x1c00fc48);
 }
 
 BOOST_AUTO_TEST_CASE(get_next_work_afterv9pos7200)
@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_afterv9pos7200)
     pindexLast.nTime = 1598344442; // 10001 seconds after block 5
     pindexLast.nBits = 0x1c00ff4a;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, &block, chainParams->GetConsensus()), 0x1c00fc48);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexLast, false, chainParams->GetConsensus()), 0x1c00fc48);
 
     CBlockIndex pindexNext;
     pindexNext.nHeight = 7;
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_afterv9pos7200)
     pindexNext.nTime = 1598344460;
     pindexNext.nBits = 0x1c00fc48;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexNext, false, &block, chainParams->GetConsensus()), 0x1c01019b);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindexNext, false, chainParams->GetConsensus()), 0x1c01019b);
 }
 
 BOOST_AUTO_TEST_CASE(get_next_work_beforev9real)
@@ -355,7 +355,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_beforev9real)
     pindex495502.nTime = 1588170817;
     pindex495502.nBits = 0x1c1f42a4;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495502, false, &block, chainParams->GetConsensus()), 0x19023ad3);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495502, false, chainParams->GetConsensus()), 0x19023ad3);
 
     CBlockIndex pindex495503;
     pindex495503.nHeight = 495503;
@@ -363,7 +363,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_beforev9real)
     pindex495503.nTime = 1588170876;
     pindex495503.nBits = 0x19023ad3;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495503, false, &block, chainParams->GetConsensus()), 0x190244e6);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495503, false, chainParams->GetConsensus()), 0x190244e6);
 
     CBlockIndex pindex495504;
     pindex495504.nHeight = 495504;
@@ -371,7 +371,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_beforev9real)
     pindex495504.nTime = 1588171246;
     pindex495504.nBits = 0x190244e6;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495504, false, &block, chainParams->GetConsensus()), 0x19024475);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495504, false, chainParams->GetConsensus()), 0x19024475);
 
     CBlockIndex pindex495505;
     pindex495505.nHeight = 495505;
@@ -379,7 +379,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_beforev9real)
     pindex495505.nTime = 1588171256;
     pindex495505.nBits = 0x19024475;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495505, false, &block, chainParams->GetConsensus()), 0x19024353);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495505, false, chainParams->GetConsensus()), 0x19024353);
 
     CBlockIndex pindex495506;
     pindex495506.nHeight = 495506;
@@ -387,7 +387,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_beforev9real)
     pindex495506.nTime = 1588171290;
     pindex495506.nBits = 0x19024353;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495506, false, &block, chainParams->GetConsensus()), 0x1902423d);
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495506, false, chainParams->GetConsensus()), 0x1902423d);
 }
 
 
@@ -469,7 +469,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_afterv9real)
     pindex495502.nTime = 1598170817;
     pindex495502.nBits = 0x1c1f42a4;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495502, false, &block, chainParams->GetConsensus()), 0x19023d17); // was 0x19023ad3
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495502, false, chainParams->GetConsensus()), 0x19023d17); // was 0x19023ad3
 
     CBlockIndex pindex495503;
     pindex495503.nHeight = 495503;
@@ -477,7 +477,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_afterv9real)
     pindex495503.nTime = 1598170876;
     pindex495503.nBits = 0x19023d17;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495503, false, &block, chainParams->GetConsensus()), 0x19024180); // was 0x190244e6
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495503, false, chainParams->GetConsensus()), 0x19024180); // was 0x190244e6
 
     CBlockIndex pindex495504;
     pindex495504.nHeight = 495504;
@@ -485,7 +485,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_afterv9real)
     pindex495504.nTime = 1598171246;
     pindex495504.nBits = 0x19024180;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495504, false, &block, chainParams->GetConsensus()), 0x19023b5e); //was 0x19024475
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495504, false, chainParams->GetConsensus()), 0x19023b5e); //was 0x19024475
 
     CBlockIndex pindex495505;
     pindex495505.nHeight = 495505;
@@ -493,7 +493,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_afterv9real)
     pindex495505.nTime = 1598171256;
     pindex495505.nBits = 0x19023b5e;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495505, false, &block, chainParams->GetConsensus()), 0x1902349f); // was 0x19024353
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495505, false, chainParams->GetConsensus()), 0x1902349f); // was 0x19024353
 
     CBlockIndex pindex495506;
     pindex495506.nHeight = 495506;
@@ -501,7 +501,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_afterv9real)
     pindex495506.nTime = 1598171290;
     pindex495506.nBits = 0x1902349f;
 
-    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495506, false, &block, chainParams->GetConsensus()), 0x19022e00); // was 0x1902423d
+    BOOST_CHECK_EQUAL(GetNextTargetRequired(&pindex495506, false, chainParams->GetConsensus()), 0x19022e00); // was 0x1902423d
 }
 
 
