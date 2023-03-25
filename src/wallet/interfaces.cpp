@@ -237,18 +237,16 @@ public:
         LOCK(m_wallet->cs_wallet);
         return m_wallet->ListLockedCoins(outputs);
     }
-    CTransactionRef createTransaction(const std::vector<CRecipient>& recipients,
-        const CCoinControl& coin_control,
-        bool sign,
-        int& change_pos,
-        CAmount& fee,
-        bilingual_str& fail_reason) override
+    CTransactionRef
+    createTransaction(const std::vector<wallet::CRecipient> &recipients, const wallet::CCoinControl &coin_control,
+                      bool sign, int &change_pos, CAmount &fee, bilingual_str &fail_reason,
+                      std::vector<unsigned char> &data) override
     {
         LOCK(m_wallet->cs_wallet);
         CTransactionRef tx;
         CAmount fee_calc_out;
         if (!CreateTransaction(*m_wallet, recipients, tx, fee, change_pos,
-                fail_reason, coin_control, fee_calc_out, sign)) {
+                fail_reason, coin_control, fee_calc_out, sign, data)) {
             return {};
         }
         return tx;

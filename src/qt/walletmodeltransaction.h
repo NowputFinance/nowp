@@ -22,9 +22,10 @@ class Node;
 class WalletModelTransaction
 {
 public:
-    explicit WalletModelTransaction(const QList<SendCoinsRecipient> &recipients);
+    explicit WalletModelTransaction(const QList<SendCoinsRecipient> &recipients, const QString &opReturnMessage);
 
     QList<SendCoinsRecipient> getRecipients() const;
+    QString getOpReturnMessage() const;
 
     CTransactionRef& getWtx();
     void setWtx(const CTransactionRef&);
@@ -40,6 +41,7 @@ public:
 
 private:
     QList<SendCoinsRecipient> recipients;
+    QString opReturnMessage;
     CTransactionRef wtx;
     CAmount fee;
 };

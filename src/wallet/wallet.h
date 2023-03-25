@@ -42,7 +42,6 @@
 
 #include <boost/signals2/signal.hpp>
 
-
 using LoadWalletFn = std::function<void(std::unique_ptr<interfaces::Wallet> wallet)>;
 
 class CScript;

@@ -110,6 +110,7 @@ private Q_SLOTS:
     void coinControlClipboardBytes();
     void coinControlClipboardLowOutput();
     void coinControlClipboardChange();
+    void toggleOpReturnMessageVisibility();
     //void updateFeeSectionControls();
     //void updateSmartFeeLabel();
     void updateNumberOfBlocks(int count, const QDateTime& blockDate, double nVerificationProgress, bool headers, SynchronizationState sync_state);

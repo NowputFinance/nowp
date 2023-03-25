@@ -119,7 +119,8 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle *_platformStyle, QWidget *p
     ui->labelCoinControlBytes->addAction(clipboardBytesAction);
     ui->labelCoinControlLowOutput->addAction(clipboardLowOutputAction);
     ui->labelCoinControlChange->addAction(clipboardChangeAction);
-
+    ui->opReturnMsgTextBox->setVisible(false);
+    connect(ui->addMessageCb, &QCheckBox::stateChanged, this, &SendCoinsDialog::toggleOpReturnMessageVisibility);
     /*
     // init transaction fee section
     QSettings settings;
@@ -288,8 +289,10 @@ bool SendCoinsDialog::PrepareSendText(QString& question_string, QString& informa
         return false;
     }
 
+    QString opReturnMessage = ui->opReturnMsgTextBox->text();
+
     // prepare transaction for getting txFee earlier
-    m_current_transaction = std::make_unique<WalletModelTransaction>(recipients);
+    m_current_transaction = std::make_unique<WalletModelTransaction>(recipients, opReturnMessage);
     WalletModel::SendCoinsReturn prepareStatus;
 
     updateCoinControlState();
@@ -1051,6 +1054,10 @@ void SendCoinsDialog::coinControlUpdateLabels()
     }
 }
 
+void SendCoinsDialog::toggleOpReturnMessageVisibility() {
+    ui->opReturnMsgTextBox->setVisible(ui->addMessageCb->isChecked());
+}
+
 SendConfirmationDialog::SendConfirmationDialog(const QString& title, const QString& text, const QString& informative_text, const QString& detailed_text, int _secDelay, bool enable_send, bool always_show_unsigned, QWidget* parent)
     : QMessageBox(parent), secDelay(_secDelay), m_enable_send(enable_send)
 {
@@ -1110,3 +1117,4 @@ void SendConfirmationDialog::updateButtons()
         }
     }
 }
+

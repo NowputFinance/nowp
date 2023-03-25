@@ -10,8 +10,9 @@
 
 #include <policy/policy.h>
 
-WalletModelTransaction::WalletModelTransaction(const QList<SendCoinsRecipient> &_recipients) :
+WalletModelTransaction::WalletModelTransaction(const QList<SendCoinsRecipient> &_recipients, const QString &_opReturnMessage) :
     recipients(_recipients),
+    opReturnMessage(_opReturnMessage),
     fee(0)
 {
 }
@@ -19,6 +20,10 @@ WalletModelTransaction::WalletModelTransaction(const QList<SendCoinsRecipient> &
 QList<SendCoinsRecipient> WalletModelTransaction::getRecipients() const
 {
     return recipients;
+}
+
+QString WalletModelTransaction::getOpReturnMessage() const {
+    return opReturnMessage;
 }
 
 CTransactionRef& WalletModelTransaction::getWtx()

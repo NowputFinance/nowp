@@ -137,12 +137,10 @@ public:
     virtual void listLockedCoins(std::vector<COutPoint>& outputs) = 0;
 
     //! Create transaction.
-    virtual CTransactionRef createTransaction(const std::vector<wallet::CRecipient>& recipients,
-        const wallet::CCoinControl& coin_control,
-        bool sign,
-        int& change_pos,
-        CAmount& fee,
-        bilingual_str& fail_reason) = 0;
+    virtual CTransactionRef
+    createTransaction(const std::vector<wallet::CRecipient> &recipients, const wallet::CCoinControl &coin_control,
+                      bool sign, int &change_pos, CAmount &fee, bilingual_str &fail_reason,
+                      std::vector<unsigned char> &data = emptyData) = 0;
 
     //! Commit transaction.
     virtual void commitTransaction(CTransactionRef tx,

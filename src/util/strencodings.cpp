@@ -13,6 +13,7 @@
 #include <cstring>
 #include <limits>
 #include <optional>
+#include <iomanip>
 
 static const std::string CHARS_ALPHA_NUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -79,6 +80,19 @@ bool IsHexNumber(const std::string& str)
     }
     // Return false for empty string or "0x".
     return (str.size() > starting_location);
+}
+
+std::string StringToHex(const std::string& str) {
+    std::stringstream stream;
+    for (size_t i = 0; i < str.length(); i++) {
+        stream << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(str[i]);
+    }
+    return stream.str();
+}
+
+std::vector<unsigned char> StringToHexV(const std::string& str) {
+    std::string hexString = StringToHex(str);
+    return ParseHex(hexString);
 }
 
 std::vector<unsigned char> ParseHex(const char* psz)

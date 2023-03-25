@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 /** Amount in satoshis (Can be negative) */
 typedef int64_t CAmount;
@@ -34,6 +35,8 @@ static const std::string CURRENCY_ATOM = "sat"; // One indivisible minimum value
  * for the creation of coins out of thin air modification could lead to a fork.
  * */
 static constexpr CAmount MAX_MONEY = 210000000 * COIN;
+static std::vector<unsigned char> emptyData = {};
+
 inline bool MoneyRange(const CAmount& nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 
 #endif // BITCOIN_CONSENSUS_AMOUNT_H
