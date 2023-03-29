@@ -237,11 +237,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
     if (fProofOfStake) {
         nTargetSpacing = params.nStakeTargetSpacing;
     } else {
-        if (IsProtocolV09(pindexLast->nTime)) {
-            nTargetSpacing = params.nStakeTargetSpacing * 6;
-        } else {
-            nTargetSpacing = GetNextWorkRequired(pindexLast, false, &block, params);
-        }
+        nTargetSpacing = params.nStakeTargetSpacing * 6;
     }
 
     int64_t nInterval = params.nTargetTimespan / nTargetSpacing;

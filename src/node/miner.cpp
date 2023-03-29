@@ -145,8 +145,8 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
     if (pwallet == nullptr) {
         pblock->nBits = GetNextTargetRequired(pindexPrev, false, chainparams.GetConsensus());
-        coinbaseTx.vout[0].nValue = GetProofOfWorkReward(pblock->nBits, pblock->nTime);
-        }
+        coinbaseTx.vout[0].nValue = GetBlockReward(nHeight, chainparams.GetConsensus());
+    }
 
     // Add dummy coinbase tx as first transaction
     pblock->vtx.emplace_back();
@@ -166,7 +166,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         {
             if (pwallet->CreateCoinStake(*m_node->chainman, pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, txCoinStake))
             {
-                if (txCoinStake.nTime >= std::max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - (IsProtocolV09(pindexPrev->GetBlockTime()) ? MAX_FUTURE_BLOCK_TIME : MAX_FUTURE_BLOCK_TIME_PREV9)))
+                if (txCoinStake.nTime >= std::max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - MAX_FUTURE_BLOCK_TIME ))
                 {   // make sure coinstake would meet timestamp protocol
                     // as it would be the same as the block timestamp
                     coinbaseTx.vout[0].SetEmpty();
@@ -224,7 +224,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     if (pblock->IsProofOfStake())
         pblock->nTime      = pblock->vtx[1]->nTime; //same as coinstake timestamp
     pblock->nTime          = std::max(pindexPrev->GetMedianTimePast()+1, pblock->GetMaxTransactionTime());
-    pblock->nTime          = std::max(pblock->GetBlockTime(), pindexPrev->GetBlockTime() - (IsProtocolV09(pindexPrev->GetBlockTime()) ? MAX_FUTURE_BLOCK_TIME : MAX_FUTURE_BLOCK_TIME_PREV9));
+    pblock->nTime          = std::max(pblock->GetBlockTime(), pindexPrev->GetBlockTime() - MAX_FUTURE_BLOCK_TIME);
     if (pblock->IsProofOfWork())
         UpdateTime(pblock);
     pblock->nNonce         = 0;

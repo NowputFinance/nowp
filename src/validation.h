@@ -1012,7 +1012,7 @@ bool DumpMempool(const CTxMemPool& pool, FopenFn mockable_fopen_function = fsbri
 bool LoadMempool(CTxMemPool& pool, CChainState& active_chainstate, FopenFn mockable_fopen_function = fsbridge::fopen);
 
 // nowp:
-CAmount GetProofOfWorkReward(unsigned int nBits, uint32_t nTime);
+int64_t GetBlockReward(int height, const Consensus::Params &params);
 CAmount GetProofOfStakeReward(int64_t nCoinAge, uint32_t nTime, uint64_t nMoneySupply);
 bool GetCoinAge(const CTransaction& tx, const CCoinsViewCache &view, uint64_t& nCoinAge, unsigned int nTimeTx, bool isTrueCoinAge = true); // nowp: get transaction coin age
 bool SignBlock(CBlock& block, const CWallet& keystore);

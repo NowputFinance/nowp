@@ -62,12 +62,6 @@ static std::map<int, unsigned int> mapStakeModifierTestnetCheckpoints =
     ( 0, 0x0e00670bu )
     ;
 
-// Whether the given coinstake is subject to new v0.3 protocol
-bool IsProtocolV03(unsigned int nTimeCoinStake)
-{
-    return (nTimeCoinStake >= (Params().NetworkIDString() != CBaseChainParams::MAIN ? nProtocolV03TestSwitchTime : nProtocolV03SwitchTime));
-}
-
 // Whether the given block is subject to new v0.4 protocol
 bool IsProtocolV04(unsigned int nTimeBlock)
 {
@@ -109,12 +103,6 @@ bool IsBTC16BIPsEnabled(uint32_t nTimeTx)
 {
     bool fTestNet = Params().NetworkIDString() != CBaseChainParams::MAIN;
     return (nTimeTx >= (fTestNet? nBTC16BIPsTestSwitchTime : nBTC16BIPsSwitchTime));
-}
-
-// Whether a given timestamp is subject to new v0.9 protocol
-bool IsProtocolV09(unsigned int nTime)
-{
-  return (nTime >= (Params().NetworkIDString() != CBaseChainParams::MAIN ? nProtocolV09TestSwitchTime : nProtocolV09SwitchTime));
 }
 
 // Whether a given timestamp is subject to new v10 protocol
@@ -507,39 +495,31 @@ bool CheckStakeKernelHash(unsigned int nBits, CBlockIndex* pindexPrev, const CBl
     // v0.3 protocol kernel hash weight starts from 0 at the 30-day min age
     // this change increases active coins participating the hash and helps
     // to secure the network when proof-of-stake difficulty is low
-    int64_t nTimeWeight = min((int64_t)nTimeTx - (txPrev->nTime? txPrev->nTime : nTimeBlockFrom), params.nStakeMaxAge) - (IsProtocolV03(nTimeTx)? params.nStakeMinAge : 0);
+    int64_t nTimeWeight = min((int64_t)nTimeTx - (txPrev->nTime? txPrev->nTime : nTimeBlockFrom), params.nStakeMaxAge) - params.nStakeMinAge;
     CBigNum bnCoinDayWeight = CBigNum(nValueIn) * nTimeWeight / COIN / (24 * 60 * 60);
     // Calculate hash
     CDataStream ss(SER_GETHASH, 0);
     uint64_t nStakeModifier = 0;
     int nStakeModifierHeight = 0;
     int64_t nStakeModifierTime = 0;
-    if (IsProtocolV03(nTimeTx))  // v0.3 protocol
-    {
-        if (!GetKernelStakeModifier(pindexPrev, blockFrom.GetHash(), nTimeTx, nStakeModifier, nStakeModifierHeight, nStakeModifierTime, fPrintProofOfStake, chainstate))
-            return false;
-        ss << nStakeModifier;
-    }
-    else // v0.2 protocol
-    {
-        ss << nBits;
-    }
+    if (!GetKernelStakeModifier(pindexPrev, blockFrom.GetHash(), nTimeTx, nStakeModifier, nStakeModifierHeight, nStakeModifierTime, fPrintProofOfStake, chainstate))
+        return false;
+    ss << nStakeModifier;
 
     ss << nTimeBlockFrom << nTxPrevOffset << (txPrev->nTime? txPrev->nTime : nTimeBlockFrom) << prevout.n << nTimeTx;
     hashProofOfStake = Hash(ss);
     if (fPrintProofOfStake)
     {
-        if (IsProtocolV03(nTimeTx)) {
-            const CBlockIndex* pindexTmp = chainstate.m_blockman.LookupBlockIndex(blockFrom.GetHash());
-            LogPrintf("CheckStakeKernelHash() : using modifier 0x%016x at height=%d timestamp=%s for block from height=%d timestamp=%s\n",
-                nStakeModifier, nStakeModifierHeight,
-                FormatISO8601DateTime(nStakeModifierTime),
-                pindexTmp->nHeight,
-                FormatISO8601DateTime(blockFrom.GetBlockTime()));
-        }
+        const CBlockIndex* pindexTmp = chainstate.m_blockman.LookupBlockIndex(blockFrom.GetHash());
+        LogPrintf("CheckStakeKernelHash() : using modifier 0x%016x at height=%d timestamp=%s for block from height=%d timestamp=%s\n",
+            nStakeModifier, nStakeModifierHeight,
+            FormatISO8601DateTime(nStakeModifierTime),
+            pindexTmp->nHeight,
+            FormatISO8601DateTime(blockFrom.GetBlockTime()));
+
         LogPrintf("CheckStakeKernelHash() : check protocol=%s modifier=0x%016x nTimeBlockFrom=%u nTxPrevOffset=%u nTimeTxPrev=%u nPrevout=%u nTimeTx=%u hashProof=%s\n",
-            IsProtocolV05(nTimeTx)? "0.5" : (IsProtocolV03(nTimeTx)? "0.3" : "0.2"),
-            IsProtocolV03(nTimeTx)? nStakeModifier : (uint64_t) nBits,
+            IsProtocolV05(nTimeTx)? "0.5" : "0.3",
+            nStakeModifier,
             nTimeBlockFrom, nTxPrevOffset, (txPrev->nTime? txPrev->nTime : nTimeBlockFrom), prevout.n, nTimeTx,
             hashProofOfStake.ToString());
     }
@@ -549,19 +529,15 @@ bool CheckStakeKernelHash(unsigned int nBits, CBlockIndex* pindexPrev, const CBl
         return false;
     if (gArgs.GetBoolArg("-debug", false) && !fPrintProofOfStake)
     {
-        if (IsProtocolV03(nTimeTx)) {
-            const CBlockIndex* pindexTmp = chainstate.m_blockman.LookupBlockIndex(blockFrom.GetHash());
-            LogPrintf("CheckStakeKernelHash() : using modifier 0x%016x at height=%d timestamp=%s for block from height=%d timestamp=%s\n",
-                nStakeModifier, nStakeModifierHeight, 
-                FormatISO8601DateTime(nStakeModifierTime),
-                pindexTmp->nHeight,
-                FormatISO8601DateTime(blockFrom.GetBlockTime()));
-        }
+        const CBlockIndex* pindexTmp = chainstate.m_blockman.LookupBlockIndex(blockFrom.GetHash());
+        LogPrintf("CheckStakeKernelHash() : using modifier 0x%016x at height=%d timestamp=%s for block from height=%d timestamp=%s\n",
+            nStakeModifier, nStakeModifierHeight,
+            FormatISO8601DateTime(nStakeModifierTime),
+            pindexTmp->nHeight,
+            FormatISO8601DateTime(blockFrom.GetBlockTime()));
+
         LogPrintf("CheckStakeKernelHash() : pass protocol=%s modifier=0x%016x nTimeBlockFrom=%u nTxPrevOffset=%u nTimeTxPrev=%u nPrevout=%u nTimeTx=%u hashProof=%s\n",
-            IsProtocolV03(nTimeTx)? "0.3" : "0.2",
-            IsProtocolV03(nTimeTx)? nStakeModifier : (uint64_t) nBits,
-            nTimeBlockFrom, nTxPrevOffset, (txPrev->nTime? txPrev->nTime : nTimeBlockFrom), prevout.n, nTimeTx,
-            hashProofOfStake.ToString());
+            "0.3", nStakeModifier, nTimeBlockFrom, nTxPrevOffset, (txPrev->nTime? txPrev->nTime : nTimeBlockFrom), prevout.n, nTimeTx, hashProofOfStake.ToString());
     }
     return true;
 }
@@ -625,10 +601,7 @@ bool CheckProofOfStake(BlockValidationState &state, CBlockIndex* pindexPrev, con
 // Check whether the coinstake timestamp meets protocol
 bool CheckCoinStakeTimestamp(int64_t nTimeBlock, int64_t nTimeTx)
 {
-    if (IsProtocolV03(nTimeTx))  // v0.3 protocol
-        return (nTimeBlock == nTimeTx);
-    else // v0.2 protocol
-        return ((nTimeTx <= nTimeBlock) && (nTimeBlock <= nTimeTx + MAX_FUTURE_BLOCK_TIME_PREV9));
+    return (nTimeBlock == nTimeTx);
 }
 
 // Get stake modifier checksum

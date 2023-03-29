@@ -651,7 +651,7 @@ bool MemPoolAccept::PreChecks(ATMPArgs& args, Workspace& ws)
     }
     // Time (prevent mempool memory exhaustion attack)
     // moved from CheckTransaction() to here, because it makes no sense to make GetAdjustedTime() a part of the consensus rules - user can set his clock to whatever he wishes.
-    if (tx.nTime > GetAdjustedTime() + (IsProtocolV09(GetAdjustedTime()) ? MAX_FUTURE_BLOCK_TIME : MAX_FUTURE_BLOCK_TIME_PREV9))
+    if (tx.nTime > GetAdjustedTime() + MAX_FUTURE_BLOCK_TIME)
         return state.Invalid(TxValidationResult::TX_CONSENSUS, "timestamp-too-far");
 
     // Coinbase is only valid in a block, not as a loose transaction
@@ -1256,67 +1256,22 @@ PackageMempoolAcceptResult ProcessNewPackage(CChainState& active_chainstate, CTx
     return result;
 }
 
-int64_t GetProofOfWorkReward(unsigned int nBits, uint32_t nTime)
+int64_t GetBlockReward(int height, const Consensus::Params &params)
 {
-    CBigNum bnSubsidyLimit = MAX_MINT_PROOF_OF_WORK;
-    CBigNum bnTarget;
-    bnTarget.SetCompact(nBits);
-    CBigNum bnTargetLimit(Params().GetConsensus().powLimit);
-    bnTargetLimit.SetCompact(bnTargetLimit.GetCompact());
 
-    // nowp: subsidy is cut in half every 16x multiply of difficulty
-    // A reasonably continuous curve is used to avoid shock to market
-    // (nSubsidyLimit / nSubsidy) ** 4 == bnProofOfWorkLimit / bnTarget
-    CBigNum bnLowerBound = CENT;
-    CBigNum bnUpperBound = bnSubsidyLimit;
-    while (bnLowerBound + CENT <= bnUpperBound)
-    {
-        CBigNum bnMidValue = (bnLowerBound + bnUpperBound) / 2;
-        if (gArgs.GetBoolArg("-printcreation", false))
-            LogPrintf("%s: lower=%lld upper=%lld mid=%lld\n", __func__, bnLowerBound.getuint64(), bnUpperBound.getuint64(), bnMidValue.getuint64());
-        if (bnMidValue * bnMidValue * bnMidValue * bnMidValue * bnTargetLimit > bnSubsidyLimit * bnSubsidyLimit * bnSubsidyLimit * bnSubsidyLimit * bnTarget)
-            bnUpperBound = bnMidValue;
-        else
-            bnLowerBound = bnMidValue;
+    int64_t nSubsidy = 188 * COIN;
+    if(height == 1) {
+        nSubsidy = 12600000 * COIN;
+    } else if(height <= 1440) {
+        nSubsidy = 10 * COIN;
+    } else {
+        int halvings = height / params.nSubsidyHalvingInterval;
+        if (halvings >= 128)
+            return 0;
+        // Subsidy is cut in half every 210,000 blocks which will occur approximately every 2 years.
+        nSubsidy >>= halvings;
     }
 
-    int64_t nSubsidy = bnUpperBound.getuint64();
-    nSubsidy = (nSubsidy / CENT) * CENT;
-
-    nSubsidy = std::min(nSubsidy, IsProtocolV10(nTime) ? MAX_MINT_PROOF_OF_WORK_V10 : MAX_MINT_PROOF_OF_WORK);
-
-    if (gArgs.GetBoolArg("-printcreation", false))
-        LogPrintf("%s: create=%s nBits=0x%08x nSubsidy=%lld\n", __func__, FormatMoney(nSubsidy), nBits, nSubsidy);
-
-    return nSubsidy;
-}
-
-// nowp: miner's coin stake is rewarded based on coin age spent (coin-days)
-int64_t GetProofOfStakeReward(int64_t nCoinAge, uint32_t nTime, uint64_t nMoneySupply)
-{
-    static int64_t nRewardCoinYear = CENT;  // creation amount per coin-year
-    int64_t nSubsidy = nCoinAge * 33 / (365 * 33 + 8) * nRewardCoinYear;
-
-    if (IsProtocolV09(nTime)) {
-        // rfc18
-        // YearlyBlocks = ((365 * 33 + 8) / 33) * 1440 / 10
-        // some efforts not to lose precision
-        CBigNum bnInflationAdjustment = nMoneySupply;
-        bnInflationAdjustment *= 25 * 33;
-        bnInflationAdjustment /= 10000 * 144;
-        bnInflationAdjustment /= (365 * 33 + 8);
-
-        uint64_t nInflationAdjustment = bnInflationAdjustment.getuint64();
-        uint64_t nSubsidyNew = (nSubsidy * 3) + nInflationAdjustment;
-
-        if (gArgs.GetBoolArg("-printcreation", false))
-            LogPrintf("%s: money supply %ld, inflation adjustment %f, old subsidy %ld, new subsidy %ld\n", __func__, nMoneySupply, nInflationAdjustment/1000000.0, nSubsidy, nSubsidyNew);
-
-        nSubsidy = nSubsidyNew;
-        }
-
-    if (gArgs.GetBoolArg("-printcreation", false))
-        LogPrintf("%s: create=%s nCoinAge=%lld\n", __func__, FormatMoney(nSubsidy), nCoinAge);
     return nSubsidy;
 }
 
@@ -2145,6 +2100,16 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
 
     // nowp: coinbase reward check relocated to CheckBlock()
+    CAmount nCoinbaseCost = 0;
+    //CAmount blockReward = GetBlockReward();
+    if (block.IsProofOfWork())
+        nCoinbaseCost = (GetMinFee(*block.vtx[0], block.nTime) < PERKB_TX_FEE)? 0 : (GetMinFee(*block.vtx[0], block.nTime) - PERKB_TX_FEE);
+    CAmount blockReward = GetBlockReward(pindex->nHeight, m_params.GetConsensus());
+    if (block.vtx[0]->GetValueOut() > (block.IsProofOfWork() ? (blockReward - nCoinbaseCost) : 0))
+        return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cb-amount",
+                             strprintf("CheckBlock() : coinbase reward exceeded %s > %s",
+                                       FormatMoney(block.vtx[0]->GetValueOut()),
+                                       FormatMoney(block.IsProofOfWork() ? blockReward : 0)));
 
     if (!control.Wait()) {
         LogPrintf("ERROR: %s: CheckQueue failed\n", __func__);
@@ -3201,22 +3166,13 @@ bool CheckBlock(const CBlock& block, BlockValidationState& state, const Consensu
         return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cb-notempty", "coinbase output not empty in PoS block");
 
     // Check coinbase timestamp
-    if (block.GetBlockTime() > (block.vtx[0]->nTime ? (int64_t)block.vtx[0]->nTime : block.GetBlockTime()) + (IsProtocolV09(block.GetBlockTime()) ? MAX_FUTURE_BLOCK_TIME : MAX_FUTURE_BLOCK_TIME_PREV9))
+    if (block.GetBlockTime() > (block.vtx[0]->nTime ? (int64_t)block.vtx[0]->nTime : block.GetBlockTime()) + MAX_FUTURE_BLOCK_TIME)
         return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cb-time", "coinbase timestamp is too early");
 
     // Check coinstake timestamp
     if (block.IsProofOfStake() && !CheckCoinStakeTimestamp(block.GetBlockTime(), block.vtx[1]->nTime ? (int64_t)block.vtx[1]->nTime : block.GetBlockTime()))
         return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cs-time", "coinstake timestamp violation");
 
-    // Check coinbase reward
-    CAmount nCoinbaseCost = 0;
-    if (block.IsProofOfWork())
-        nCoinbaseCost = (GetMinFee(*block.vtx[0], block.nTime) < PERKB_TX_FEE)? 0 : (GetMinFee(*block.vtx[0], block.nTime) - PERKB_TX_FEE);
-    if (block.vtx[0]->GetValueOut() > (block.IsProofOfWork()? (GetProofOfWorkReward(block.nBits, block.GetBlockTime()) - nCoinbaseCost) : 0))
-        return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cb-amount",
-                strprintf("CheckBlock() : coinbase reward exceeded %s > %s",
-                   FormatMoney(block.vtx[0]->GetValueOut()),
-                   FormatMoney(block.IsProofOfWork()? GetProofOfWorkReward(block.nBits, block.GetBlockTime()) : 0)));
     // Check transactions
     // Must check for duplicate inputs (see CVE-2018-17144)
     for (const auto& tx : block.vtx) {
@@ -3324,11 +3280,11 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidatio
     }
 
     // Check timestamp against prev
-    if (block.GetBlockTime() <= pindexPrev->GetMedianTimePast() || block.GetBlockTime() + (IsProtocolV09(block.GetBlockTime()) ? MAX_FUTURE_BLOCK_TIME : MAX_FUTURE_BLOCK_TIME_PREV9) < pindexPrev->GetBlockTime())
+    if (block.GetBlockTime() <= pindexPrev->GetMedianTimePast() || block.GetBlockTime() + MAX_FUTURE_BLOCK_TIME < pindexPrev->GetBlockTime())
         return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "time-too-old", "block's timestamp is too early");
 
     // Check timestamp
-    if (block.GetBlockTime() > nAdjustedTime + (IsProtocolV09(block.GetBlockTime()) ? MAX_FUTURE_BLOCK_TIME : MAX_FUTURE_BLOCK_TIME_PREV9))
+    if (block.GetBlockTime() > nAdjustedTime + MAX_FUTURE_BLOCK_TIME)
         return state.Invalid(BlockValidationResult::BLOCK_TIME_FUTURE, "time-too-new", "block timestamp too far in the future");
 
     // Reject outdated version blocks when 95% (75% on testnet) of the network has upgraded:
@@ -4680,7 +4636,7 @@ bool GetCoinAge(const CTransaction& tx, const CCoinsViewCache &view, uint64_t& n
         int64_t nValueIn = txPrev->vout[txin.prevout.n].nValue;
         int nEffectiveAge = nTimeTx-(txPrev->nTime ? txPrev->nTime : header.GetBlockTime());
 
-        if (!isTrueCoinAge || IsProtocolV09(nTimeTx))
+        if (!isTrueCoinAge)
             nEffectiveAge = std::min(nEffectiveAge, 365 * 24 * 60 * 60);
 
         bnCentSecond += arith_uint256(nValueIn) * nEffectiveAge / CENT;

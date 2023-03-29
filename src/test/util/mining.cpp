@@ -40,14 +40,15 @@ std::vector<std::shared_ptr<CBlock>> CreateBlockChain(size_t total_height, const
         block.nTime = ++time;
         block.nBits = params.GenesisBlock().nBits;
         block.nNonce = 0;
+        int blockHeight = height + 1;
 
         CMutableTransaction coinbase_tx;
         coinbase_tx.vin.resize(1);
         coinbase_tx.vin[0].prevout.SetNull();
         coinbase_tx.vout.resize(1);
         coinbase_tx.vout[0].scriptPubKey = P2WSH_OP_TRUE;
-        coinbase_tx.vout[0].nValue =  GetProofOfWorkReward(block.nBits, block.nTime);//GetBlockSubsidy(height + 1, params.GetConsensus());
-        coinbase_tx.vin[0].scriptSig = CScript() << (height + 1) << OP_0;
+        coinbase_tx.vout[0].nValue = GetBlockReward(blockHeight, params.GetConsensus());//GetBlockSubsidy(height + 1, params.GetConsensus());
+        coinbase_tx.vin[0].scriptSig = CScript() << blockHeight << OP_0;
         block.vtx = {MakeTransactionRef(std::move(coinbase_tx))};
 
         block.hashMerkleRoot = BlockMerkleRoot(block);

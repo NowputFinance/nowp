@@ -99,7 +99,7 @@ public:
         consensus.signet_blocks = false;
         consensus.signet_challenge.clear();
         //consensus.BIP16Height = 0;
-        consensus.BIP34Height = 339994;
+        consensus.BIP34Height = 1;
         consensus.BIP34Hash = uint256S("000000000000000237f50af4cfe8924e8693abc5bd8ae5abb95bc6d230f5953f");
         consensus.powLimit =            uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~arith_uint256(0) >> 32;
         consensus.bnInitialHashTarget = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~arith_uint256(0) >> 40;
@@ -111,7 +111,8 @@ public:
         consensus.nStakeMinAge = 60; //60 * 60 * 24 * 14; // minimum age for coin age
         consensus.nStakeMaxAge = 60 * 60 * 24 * 90; // maximum age for coin age
         consensus.nModifierInterval = 6 * 60 * 60; // Modifier interval: time to elapse before new modifier is computed
-        consensus.nCoinbaseMaturity = 250;
+        consensus.nCoinbaseMaturity = 200;
+        consensus.nSubsidyHalvingInterval = 525600;
 
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
@@ -121,7 +122,7 @@ public:
         consensus.nPowDGWHeight = 60;
         consensus.DGWBlocksAvg = 60;
 
-        consensus.SegwitHeight = 455470;
+        consensus.SegwitHeight = 1;
 
         consensus.nMinimumChainWork = uint256S("0x00");
         consensus.defaultAssumeValid = uint256S("0x00");
@@ -201,8 +202,8 @@ public:
         //consensus.BIP16Height = 0;
         consensus.BIP34Height = 293368;
         consensus.BIP34Hash = uint256S("00000002c0b976c7a5c9878f1cec63fb4d88d68d614aedeaf8158c42d904795e");
-        consensus.powLimit =            uint256S("0000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~arith_uint256(0) >> 28;
-        consensus.bnInitialHashTarget = uint256S("00000007ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~arith_uint256(0) >> 29;
+        consensus.powLimit =            uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.bnInitialHashTarget = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
         consensus.nTargetTimespan = 24 * 60 * 60;  // one day
         consensus.nStakeTargetSpacing = 2 * 60;  // 10-minute block spacing
@@ -212,6 +213,7 @@ public:
         consensus.nStakeMaxAge = 60 * 60 * 24 * 90;
         consensus.nModifierInterval = 60 * 20; // Modifier interval: time to elapse before new modifier is computed
         consensus.nCoinbaseMaturity = 60;
+        consensus.nSubsidyHalvingInterval = 21600;
 
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
@@ -244,10 +246,6 @@ public:
         vFixedSeeds.clear();
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
-        vSeeds.emplace_back("");
-        vSeeds.emplace_back("");
-        vSeeds.emplace_back("");
-        vSeeds.emplace_back("");
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
