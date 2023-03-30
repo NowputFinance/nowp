@@ -108,7 +108,7 @@ public:
         consensus.nStakeTargetSpacing = 2 * 60; // 2-minute block spacing
         consensus.nTargetSpacingWorkMax = 12 * consensus.nStakeTargetSpacing; // 2-hour
         consensus.nPowTargetSpacing = consensus.nStakeTargetSpacing;
-        consensus.nStakeMinAge = 60; //60 * 60 * 24 * 14; // minimum age for coin age
+        consensus.nStakeMinAge = 60 * 60 * 24 * 14; // minimum age for coin age
         consensus.nStakeMaxAge = 60 * 60 * 24 * 90; // maximum age for coin age
         consensus.nModifierInterval = 6 * 60 * 60; // Modifier interval: time to elapse before new modifier is computed
         consensus.nCoinbaseMaturity = 200;
@@ -121,6 +121,8 @@ public:
 
         consensus.nPowDGWHeight = 60;
         consensus.DGWBlocksAvg = 60;
+
+        consensus.nPoSActivation = 5000;
 
         consensus.SegwitHeight = 1;
 
@@ -209,7 +211,7 @@ public:
         consensus.nStakeTargetSpacing = 2 * 60;  // 10-minute block spacing
         consensus.nTargetSpacingWorkMax = 12 * consensus.nStakeTargetSpacing; // 2-hour
         consensus.nPowTargetSpacing = consensus.nStakeTargetSpacing;
-        consensus.nStakeMinAge = 60 * 60 * 1; // test net min age is 1 day
+        consensus.nStakeMinAge = 60 * 60; // test net min age is 1 hour
         consensus.nStakeMaxAge = 60 * 60 * 24 * 90;
         consensus.nModifierInterval = 60 * 20; // Modifier interval: time to elapse before new modifier is computed
         consensus.nCoinbaseMaturity = 60;
@@ -222,6 +224,8 @@ public:
 
         consensus.nPowDGWHeight = 60;
         consensus.DGWBlocksAvg = 60;
+
+        consensus.nPoSActivation = 5000;
 
         consensus.SegwitHeight = 394215;
 
@@ -247,7 +251,7 @@ public:
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
 
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,112);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,239);
         base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x35, 0x87, 0xCF};
@@ -352,6 +356,8 @@ public:
 
         consensus.nPowDGWHeight = 60;
         consensus.DGWBlocksAvg = 60;
+
+        consensus.nPoSActivation = 50;
 /*
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = Consensus::BIP9Deployment::NEVER_ACTIVE;

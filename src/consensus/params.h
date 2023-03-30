@@ -69,6 +69,7 @@ struct Params {
     int64_t nPowTargetSpacing;
     int nPowDGWHeight;
     int DGWBlocksAvg;
+    int nPoSActivation;
     int64_t DifficultyAdjustmentInterval() const { return nTargetTimespan / nPowTargetSpacing; }
     /** The best chain should have at least this much work */
     uint256 nMinimumChainWork;

@@ -77,6 +77,11 @@ Finally, clang (often less resource hungry) can be used instead of gcc, which is
 
 #### Dependency Build Instructions
 
+Quick Setup for headless:
+
+    sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 libevent-dev libboost-dev libssl-dev libsqlite3-dev libminiupnpc-dev libnatpmp-dev libzmq3-dev systemtap-sdt-dev -y
+
+
 Build requirements:
 
     sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3

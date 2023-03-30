@@ -239,10 +239,7 @@ CAmount GetMinFee(const CTransaction& tx, unsigned int nTimeTx)
 CAmount GetMinFee(size_t nBytes, uint32_t nTime)
 {
     CAmount nMinFee;
-    if (IsProtocolV07(nTime) || !nTime) // RFC-0007
-        nMinFee = (nBytes < 100) ? MIN_TX_FEE : (CAmount)(nBytes * (PERKB_TX_FEE / 1000));
-    else
-        nMinFee = (1 + (CAmount)nBytes / 1000) * PERKB_TX_FEE;
+    nMinFee = (nBytes < 100) ? MIN_TX_FEE : (CAmount)(nBytes * (PERKB_TX_FEE / 1000));
 
     if (!MoneyRange(nMinFee))
         nMinFee = MAX_MONEY;
