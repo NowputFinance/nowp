@@ -15,8 +15,6 @@ src/nowp-util
 src/nowp-wallet
 src/test/fuzz/fuzz
 src/test/test_nowp
-src/test/test_bitcoin
-src/minisketch/test
 src/qt/test/test_nowp-qt
 
 # autoreconf
@@ -173,4 +171,3 @@ dist/
 
 /guix-build-*
 .idea
-.vscode

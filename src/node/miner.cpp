@@ -13,7 +13,6 @@
 #include <consensus/merkle.h>
 #include <consensus/tx_verify.h>
 #include <consensus/validation.h>
-#include <consensus/params.h>
 #include <policy/policy.h>
 #include <pow.h>
 #include <primitives/transaction.h>
@@ -167,11 +166,8 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         {
             if (pwallet->CreateCoinStake(*m_node->chainman, pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, txCoinStake))
             {
-                const Consensus::Params& consensusParams = chainparams.GetConsensus();
-                if (nHeight >= consensusParams.nPoSActivation && 
-                    txCoinStake.nTime >= std::max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - MAX_FUTURE_BLOCK_TIME))
-                {
-                    // make sure coinstake would meet timestamp protocol
+                if (txCoinStake.nTime >= std::max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - MAX_FUTURE_BLOCK_TIME ))
+                {   // make sure coinstake would meet timestamp protocol
                     // as it would be the same as the block timestamp
                     coinbaseTx.vout[0].SetEmpty();
                     coinbaseTx.nTime = txCoinStake.nTime;

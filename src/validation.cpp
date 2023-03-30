@@ -840,6 +840,10 @@ bool MemPoolAccept::PolicyScriptChecks(const ATMPArgs& args, Workspace& ws)
     //if (IsBTC16BIPsEnabled(tx.nTime))
     //    scriptVerifyFlags &= SCRIPT_VERIFY_LOW_S;
 
+    // nowp allow taproot after fork
+    //if (IsProtocolV12(tx.nTime))
+    //    scriptVerifyFlags &= SCRIPT_VERIFY_TAPROOT;
+
     // Check input scripts and signatures.
     // This is done last to help prevent CPU exhaustion denial-of-service attacks.
     if (!CheckInputScripts(tx, state, m_view, scriptVerifyFlags, true, false, ws.m_precomputed_txdata)) {
@@ -1644,7 +1648,7 @@ DisconnectResult CChainState::DisconnectBlock(const CBlock& block, const CBlockI
         // exactly.
         for (size_t o = 0; o < tx.vout.size(); o++) {
             if (!tx.vout[o].scriptPubKey.IsUnspendable()) {
-                if (!tx.vout[o].nValue)
+                if (IsProtocolV12(pindex) && !tx.vout[o].nValue)
                     continue;
                 COutPoint out(hash, o);
                 Coin coin;
@@ -1712,8 +1716,9 @@ static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consens
     if (pindex->pprev && IsBTC16BIPsEnabled(pindex->pprev->nTime)) {
         flags |= SCRIPT_VERIFY_DERSIG;
     }
-    if(pindex->pprev) {
-        // Enforce CHECKLOCKTIMEVERIFY (BIP65)
+
+    // Enforce CHECKLOCKTIMEVERIFY (BIP65)
+    if (IsProtocolV06(pindex->pprev)) {
         flags |= SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
     }
 
@@ -1722,12 +1727,15 @@ static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consens
     if (pindex->pprev && IsBTC16BIPsEnabled(pindex->pprev->nTime)) {
         flags |= SCRIPT_VERIFY_CHECKSEQUENCEVERIFY | SCRIPT_VERIFY_NULLDUMMY;
     }
-    if(pindex->pprev) {
-        // Enforce Taproot (BIP340-BIP342)
+
+    // Enforce Taproot (BIP340-BIP342)
+    if (pindex->pprev && IsProtocolV12(pindex->pprev)) {
         flags |= SCRIPT_VERIFY_TAPROOT;
     }
+
     return flags;
 }
+
 
 
 static int64_t nTimeCheck = 0;
@@ -2086,7 +2094,7 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
         if (i > 0) {
             blockundo.vtxundo.push_back(CTxUndo());
         }
-        UpdateCoins(tx, view, i == 0 ? undoDummy : blockundo.vtxundo.back(), pindex->nHeight, true);
+        UpdateCoins(tx, view, i == 0 ? undoDummy : blockundo.vtxundo.back(), pindex->nHeight, IsProtocolV12(pindex));
     }
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
@@ -3281,7 +3289,8 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidatio
 
     // Reject outdated version blocks when 95% (75% on testnet) of the network has upgraded:
     // check for version 2, 3 and 4 upgrades
-    if ((block.nVersion < 4))
+    if ((block.nVersion < 2 && IsProtocolV06(pindexPrev)) ||
+        (block.nVersion < 4 && IsProtocolV12(pindexPrev)))
             return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, strprintf("bad-version(0x%08x)", block.nVersion),
                                  strprintf("rejected nVersion=0x%08x block", block.nVersion));
 
@@ -3317,7 +3326,7 @@ static bool ContextualCheckBlock(const CBlock& block, BlockValidationState& stat
     }
 
     // Enforce rule that the coinbase starts with serialized block height
-    if (pindexPrev && block.nVersion >= 4)
+    if (pindexPrev && IsProtocolV06(pindexPrev) && block.nVersion >= 2)
     {
         CScript expect = CScript() << nHeight;
         if (block.vtx[0]->vin[0].scriptSig.size() < expect.size() ||
@@ -3883,7 +3892,7 @@ bool CChainState::RollforwardBlock(const CBlockIndex* pindex, CCoinsViewCache& i
             }
         }
         // Pass check = true as every addition may be an overwrite.
-        AddCoins(inputs, *tx, pindex->nHeight, true, true);
+        AddCoins(inputs, *tx, pindex->nHeight, true, IsProtocolV12(pindex));
     }
     return true;
 }

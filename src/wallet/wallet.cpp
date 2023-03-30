@@ -3391,7 +3391,7 @@ bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwalle
     }
 
     CAmount nMinFee = 0;
-    CAmount nMinFeeBase = MIN_TX_FEE;
+    CAmount nMinFeeBase = (IsProtocolV07(txNew.nTime) ? MIN_TX_FEE : MIN_TX_FEE_PREV7);
     while(true)
     {
         // Set output amount
