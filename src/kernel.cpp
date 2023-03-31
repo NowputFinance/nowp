@@ -90,13 +90,6 @@ bool IsProtocolV06(const CBlockIndex* pindexPrev)
   return false;
 }
 
-// Whether a given transaction is subject to new v0.7 protocol
-bool IsProtocolV07(unsigned int nTimeTx)
-{
-    bool fTestNet = Params().NetworkIDString() != CBaseChainParams::MAIN;
-    return (nTimeTx >= (fTestNet? nProtocolV07TestSwitchTime : nProtocolV07SwitchTime));
-}
-
 bool IsBTC16BIPsEnabled(uint32_t nTimeTx)
 {
     bool fTestNet = Params().NetworkIDString() != CBaseChainParams::MAIN;
