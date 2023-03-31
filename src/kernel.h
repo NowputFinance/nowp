@@ -17,12 +17,6 @@ class CChainState;
 // ratio of group interval length between the last group and the first group
 static const int MODIFIER_INTERVAL_RATIO = 3;
 
-// Protocol switch time of v0.3 kernel protocol
-extern unsigned int nProtocolV03SwitchTime;
-extern unsigned int nProtocolV03TestSwitchTime;
-
-// Whether a given coinstake is subject to new v0.3 protocol
-bool IsProtocolV03(unsigned int nTimeCoinStake);
 // Whether a given block is subject to new v0.4 protocol
 bool IsProtocolV04(unsigned int nTimeBlock);
 // Whether a given transaction is subject to new v0.5 protocol

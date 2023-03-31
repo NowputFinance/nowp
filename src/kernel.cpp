@@ -20,9 +20,6 @@
 
 using namespace std;
 
-// Protocol switch time of v0.3 kernel protocol
-unsigned int nProtocolV03SwitchTime     = 1677521510;
-unsigned int nProtocolV03TestSwitchTime = 1677521510;
 // Protocol switch time of v0.4 kernel protocol
 unsigned int nProtocolV04SwitchTime     = 1677522510;
 unsigned int nProtocolV04TestSwitchTime = 1677522510;
@@ -33,9 +30,6 @@ unsigned int nProtocolV05TestSwitchTime = 1677523510;
 // supermajority hardfork: actual fork will happen later than switch time
 const unsigned int nProtocolV06SwitchTime     = 1677523510; 
 const unsigned int nProtocolV06TestSwitchTime = 1677523510; 
-// Protocol switch time for 0.7 kernel protocol
-const unsigned int nProtocolV07SwitchTime     = 1677524510; 
-const unsigned int nProtocolV07TestSwitchTime = 1677524510; 
 // Switch time for new BIPs from bitcoin 0.16.x
 const uint32_t nBTC16BIPsSwitchTime           = 1677525510; 
 const uint32_t nBTC16BIPsTestSwitchTime       = 1677525510; 
