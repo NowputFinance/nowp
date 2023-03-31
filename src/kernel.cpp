@@ -23,9 +23,6 @@ using namespace std;
 // Switch time for new BIPs from bitcoin 0.16.x
 const uint32_t nBTC16BIPsSwitchTime           = 1677525510; 
 const uint32_t nBTC16BIPsTestSwitchTime       = 1677525510; 
-// Protocol switch time for v0.9 kernel protocol
-const unsigned int nProtocolV09SwitchTime     = 1677526510; 
-const unsigned int nProtocolV09TestSwitchTime = 1677526510; 
 // Protocol switch time for v10 kernel protocol
 const unsigned int nProtocolV10SwitchTime     = 1677527510; 
 const unsigned int nProtocolV10TestSwitchTime = 1677527510; 

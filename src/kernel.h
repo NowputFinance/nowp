@@ -19,8 +19,6 @@ static const int MODIFIER_INTERVAL_RATIO = 3;
 
 // Whether a given block is subject to new BIPs from bitcoin 0.16.x
 bool IsBTC16BIPsEnabled(uint32_t nTimeTx);
-// Whether a given timestamp is subject to new v0.9 protocol
-bool IsProtocolV09(unsigned int nTimeTx);
 // Whether a given timestamp is subject to new v10 protocol
 bool IsProtocolV10(unsigned int nTimeTx);
 // Whether a given block is subject to new v12 protocol
