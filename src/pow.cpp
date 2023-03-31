@@ -223,7 +223,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 
     // rfc20
     int64_t nHypotheticalSpacing = pindexLast->GetBlockTime() - pindexPrev->GetBlockTime();
-    if (!fProofOfStake && IsProtocolV12(pindexPrev) && (nHypotheticalSpacing > nActualSpacing))
+    if (!fProofOfStake && (nHypotheticalSpacing > nActualSpacing))
         nActualSpacing = nHypotheticalSpacing;
 
     // nowp: target change every block

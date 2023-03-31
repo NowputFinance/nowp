@@ -1389,7 +1389,7 @@ static UniValue SoftForkMajorityDesc(int version, const CBlockIndex* pindex, con
             activated = true;
             break;
         case 12:
-            activated = IsProtocolV12(pindex);
+            activated = true;
             break;
     }
     rv.pushKV("status", activated);
