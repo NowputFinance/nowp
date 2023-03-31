@@ -20,9 +20,6 @@
 
 using namespace std;
 
-// Protocol switch time of v0.5 kernel protocol
-unsigned int nProtocolV05SwitchTime     = 1677523510;
-unsigned int nProtocolV05TestSwitchTime = 1677523510;
 // Protocol switch time of v0.6 kernel protocol
 // supermajority hardfork: actual fork will happen later than switch time
 const unsigned int nProtocolV06SwitchTime     = 1677523510; 
@@ -50,13 +47,6 @@ static std::map<int, unsigned int> mapStakeModifierTestnetCheckpoints =
     boost::assign::map_list_of
     ( 1000000, 0x0e00670bu )
     ;
-
-
-// Whether the given transaction is subject to new v0.5 protocol
-bool IsProtocolV05(unsigned int nTimeTx)
-{
-    return (nTimeTx >= (Params().NetworkIDString() != CBaseChainParams::MAIN ? nProtocolV05TestSwitchTime : nProtocolV05SwitchTime));
-}
 
 // Whether a given block is subject to new v0.6 protocol
 // Test against previous block index! (always available)
@@ -414,10 +404,8 @@ static bool GetKernelStakeModifierV03(CBlockIndex* pindexPrev, uint256 hashBlock
 // Get the stake modifier specified by the protocol to hash for a stake kernel
 static bool GetKernelStakeModifier(CBlockIndex* pindexPrev, uint256 hashBlockFrom, unsigned int nTimeTx, uint64_t& nStakeModifier, int& nStakeModifierHeight, int64_t& nStakeModifierTime, bool fPrintProofOfStake, CChainState& chainstate)
 {
-    if (IsProtocolV05(nTimeTx))
-        return GetKernelStakeModifierV05(pindexPrev, nTimeTx, nStakeModifier, nStakeModifierHeight, nStakeModifierTime, fPrintProofOfStake);
-    else
-        return GetKernelStakeModifierV03(pindexPrev, hashBlockFrom, nStakeModifier, nStakeModifierHeight, nStakeModifierTime, fPrintProofOfStake, chainstate);
+    return GetKernelStakeModifierV05(pindexPrev, nTimeTx, nStakeModifier, nStakeModifierHeight, nStakeModifierTime, fPrintProofOfStake);
+
 }
 
 // nowp kernel protocol
@@ -486,7 +474,6 @@ bool CheckStakeKernelHash(unsigned int nBits, CBlockIndex* pindexPrev, const CBl
             FormatISO8601DateTime(blockFrom.GetBlockTime()));
 
         LogPrintf("CheckStakeKernelHash() : check protocol=%s modifier=0x%016x nTimeBlockFrom=%u nTxPrevOffset=%u nTimeTxPrev=%u nPrevout=%u nTimeTx=%u hashProof=%s\n",
-            IsProtocolV05(nTimeTx)? "0.5" : "0.3",
             nStakeModifier,
             nTimeBlockFrom, nTxPrevOffset, (txPrev->nTime? txPrev->nTime : nTimeBlockFrom), prevout.n, nTimeTx,
             hashProofOfStake.ToString());
