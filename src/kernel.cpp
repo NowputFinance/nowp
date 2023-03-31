@@ -23,9 +23,6 @@ using namespace std;
 // Switch time for new BIPs from bitcoin 0.16.x
 const uint32_t nBTC16BIPsSwitchTime           = 1677525510; 
 const uint32_t nBTC16BIPsTestSwitchTime       = 1677525510; 
-// Protocol switch time for v10 kernel protocol
-const unsigned int nProtocolV10SwitchTime     = 1677527510; 
-const unsigned int nProtocolV10TestSwitchTime = 1677527510; 
 // Protocol switch time for v12 kernel protocol
 const unsigned int nProtocolV12SwitchTime     = 1677528510; 
 const unsigned int nProtocolV12TestSwitchTime = 1677528510;
@@ -46,12 +43,6 @@ bool IsBTC16BIPsEnabled(uint32_t nTimeTx)
 {
     bool fTestNet = Params().NetworkIDString() != CBaseChainParams::MAIN;
     return (nTimeTx >= (fTestNet? nBTC16BIPsTestSwitchTime : nBTC16BIPsSwitchTime));
-}
-
-// Whether a given timestamp is subject to new v10 protocol
-bool IsProtocolV10(unsigned int nTime)
-{
-  return (nTime >= (Params().NetworkIDString() != CBaseChainParams::MAIN ? nProtocolV10TestSwitchTime : nProtocolV10SwitchTime));
 }
 
 // Whether a given timestamp is subject to new v10 protocol
