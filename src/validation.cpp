@@ -1718,7 +1718,7 @@ static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consens
     }
 
     // Enforce CHECKLOCKTIMEVERIFY (BIP65)
-    if (IsProtocolV06(pindex->pprev)) {
+    if (pindex->pprev) {
         flags |= SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
     }
 
@@ -3289,8 +3289,8 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidatio
 
     // Reject outdated version blocks when 95% (75% on testnet) of the network has upgraded:
     // check for version 2, 3 and 4 upgrades
-    if ((block.nVersion < 2 && IsProtocolV06(pindexPrev)) ||
-        (block.nVersion < 4 && IsProtocolV12(pindexPrev)))
+    if ((block.nVersion < 2) ||
+        (block.nVersion < 4))
             return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, strprintf("bad-version(0x%08x)", block.nVersion),
                                  strprintf("rejected nVersion=0x%08x block", block.nVersion));
 
@@ -3326,7 +3326,7 @@ static bool ContextualCheckBlock(const CBlock& block, BlockValidationState& stat
     }
 
     // Enforce rule that the coinbase starts with serialized block height
-    if (pindexPrev && IsProtocolV06(pindexPrev) && block.nVersion >= 2)
+    if (pindexPrev && block.nVersion >= 2)
     {
         CScript expect = CScript() << nHeight;
         if (block.vtx[0]->vin[0].scriptSig.size() < expect.size() ||

@@ -20,10 +20,6 @@
 
 using namespace std;
 
-// Protocol switch time of v0.6 kernel protocol
-// supermajority hardfork: actual fork will happen later than switch time
-const unsigned int nProtocolV06SwitchTime     = 1677523510; 
-const unsigned int nProtocolV06TestSwitchTime = 1677523510; 
 // Switch time for new BIPs from bitcoin 0.16.x
 const uint32_t nBTC16BIPsSwitchTime           = 1677525510; 
 const uint32_t nBTC16BIPsTestSwitchTime       = 1677525510; 
@@ -48,23 +44,6 @@ static std::map<int, unsigned int> mapStakeModifierTestnetCheckpoints =
     ( 1000000, 0x0e00670bu )
     ;
 
-// Whether a given block is subject to new v0.6 protocol
-// Test against previous block index! (always available)
-bool IsProtocolV06(const CBlockIndex* pindexPrev)
-{
-  if (pindexPrev->nTime < (Params().NetworkIDString() != CBaseChainParams::MAIN ? nProtocolV06TestSwitchTime : nProtocolV06SwitchTime))
-    return false;
-
-  // if 900 of the last 1,000 blocks are version 2 or greater (90/100 if testnet):
-  // Soft-forking PoS can be dangerous if the super majority is too low
-  // The stake majority will decrease after the fork
-  // since only coindays of updated nodes will get destroyed.
-  if ((Params().NetworkIDString() == CBaseChainParams::MAIN && IsSuperMajority(2, pindexPrev, 900, 1000)) ||
-      (Params().NetworkIDString() != CBaseChainParams::MAIN && IsSuperMajority(2, pindexPrev, 90, 100)))
-    return true;
-
-  return false;
-}
 
 bool IsBTC16BIPsEnabled(uint32_t nTimeTx)
 {

@@ -17,9 +17,6 @@ class CChainState;
 // ratio of group interval length between the last group and the first group
 static const int MODIFIER_INTERVAL_RATIO = 3;
 
-// Whether a given block is subject to new v0.6 protocol
-// Test against previous block index! (always available)
-bool IsProtocolV06(const CBlockIndex *pindexPrev);
 // Whether a given block is subject to new BIPs from bitcoin 0.16.x
 bool IsBTC16BIPsEnabled(uint32_t nTimeTx);
 // Whether a given timestamp is subject to new v0.9 protocol
