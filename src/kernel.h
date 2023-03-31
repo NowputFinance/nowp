@@ -17,8 +17,6 @@ class CChainState;
 // ratio of group interval length between the last group and the first group
 static const int MODIFIER_INTERVAL_RATIO = 3;
 
-// Whether a given block is subject to new v0.4 protocol
-bool IsProtocolV04(unsigned int nTimeBlock);
 // Whether a given transaction is subject to new v0.5 protocol
 bool IsProtocolV05(unsigned int nTimeTx);
 // Whether a given block is subject to new v0.6 protocol

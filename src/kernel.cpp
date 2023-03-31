@@ -20,9 +20,6 @@
 
 using namespace std;
 
-// Protocol switch time of v0.4 kernel protocol
-unsigned int nProtocolV04SwitchTime     = 1677522510;
-unsigned int nProtocolV04TestSwitchTime = 1677522510;
 // Protocol switch time of v0.5 kernel protocol
 unsigned int nProtocolV05SwitchTime     = 1677523510;
 unsigned int nProtocolV05TestSwitchTime = 1677523510;
@@ -54,11 +51,6 @@ static std::map<int, unsigned int> mapStakeModifierTestnetCheckpoints =
     ( 1000000, 0x0e00670bu )
     ;
 
-// Whether the given block is subject to new v0.4 protocol
-bool IsProtocolV04(unsigned int nTimeBlock)
-{
-    return (nTimeBlock >= (Params().NetworkIDString() != CBaseChainParams::MAIN ? nProtocolV04TestSwitchTime : nProtocolV04SwitchTime));
-}
 
 // Whether the given transaction is subject to new v0.5 protocol
 bool IsProtocolV05(unsigned int nTimeTx)
@@ -234,18 +226,9 @@ bool ComputeNextStakeModifier(const CBlockIndex* pindexCurrent, uint64_t &nStake
     }
     if (nModifierTime / params.nModifierInterval >= pindexCurrent->GetBlockTime() / params.nModifierInterval)
     {
-        // v0.4+ requires current block timestamp also be in a different modifier interval
-        if (IsProtocolV04(pindexCurrent->nTime))
-        {
-            if (gArgs.GetBoolArg("-debug", false))
-                LogPrintf("ComputeNextStakeModifier: (v0.4+) no new interval keep current modifier: pindexCurrent nHeight=%d nTime=%u\n", pindexCurrent->nHeight, (unsigned int)pindexCurrent->GetBlockTime());
-            return true;
-        }
-        else
-        {
-            if (gArgs.GetBoolArg("-debug", false))
-                LogPrintf("ComputeNextStakeModifier: v0.3 modifier at block %s not meeting v0.4+ protocol: pindexCurrent nHeight=%d nTime=%u\n", pindexCurrent->GetBlockHash().ToString(), pindexCurrent->nHeight, (unsigned int)pindexCurrent->GetBlockTime());
-        }
+        if (gArgs.GetBoolArg("-debug", false))
+            LogPrintf("ComputeNextStakeModifier: no new interval keep current modifier: pindexCurrent nHeight=%d nTime=%u\n", pindexCurrent->nHeight, (unsigned int)pindexCurrent->GetBlockTime());
+        return true;
     }
 
     // Sort candidate blocks by timestamp
@@ -641,22 +624,10 @@ unsigned int HowSuperMajority(int minVersion, const CBlockIndex* pstart, unsigne
 unsigned int GetStakeEntropyBit(const CBlock& block)
 {
     unsigned int nEntropyBit = 0;
-    if (IsProtocolV04(block.nTime))
-    {
-        nEntropyBit = UintToArith256(block.GetHash()).GetLow64() & 1llu;// last bit of block hash
-        if (gArgs.GetBoolArg("-printstakemodifier", false))
-            LogPrintf("GetStakeEntropyBit(v0.4+): nTime=%u hashBlock=%s entropybit=%d\n", block.nTime, block.GetHash().ToString(), nEntropyBit);
-    }
-    else
-    {
-        // old protocol for entropy bit pre v0.4
-        uint160 hashSig = Hash160(block.vchBlockSig);
-        if (gArgs.GetBoolArg("-printstakemodifier", false))
-            LogPrintf("GetStakeEntropyBit(v0.3): nTime=%u hashSig=%s", block.nTime, hashSig.ToString());
-        nEntropyBit = hashSig.GetDataPtr()[4] >> 31;  // take the first bit of the hash
-        if (gArgs.GetBoolArg("-printstakemodifier", false))
-            LogPrintf(" entropybit=%d\n", nEntropyBit);
-    }
+
+    nEntropyBit = UintToArith256(block.GetHash()).GetLow64() & 1llu;// last bit of block hash
+    if (gArgs.GetBoolArg("-printstakemodifier", false))
+        LogPrintf("GetStakeEntropyBit(v0.4+): nTime=%u hashBlock=%s entropybit=%d\n", block.nTime, block.GetHash().ToString(), nEntropyBit);
     return nEntropyBit;
 }
 
