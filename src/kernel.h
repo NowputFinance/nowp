@@ -19,8 +19,6 @@ static const int MODIFIER_INTERVAL_RATIO = 3;
 
 // Whether a given block is subject to new BIPs from bitcoin 0.16.x
 bool IsBTC16BIPsEnabled(uint32_t nTimeTx);
-// Whether a given block is subject to new v12 protocol
-bool IsProtocolV12(const CBlockIndex* pindexPrev);
 
 // Compute the hash modifier for proof-of-stake
 bool ComputeNextStakeModifier(const CBlockIndex* pindexCurrent, uint64_t& nStakeModifier, bool& fGeneratedStakeModifier, CChainState& chainstate);
