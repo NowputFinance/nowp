@@ -1968,9 +1968,9 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
     // edge case when manipulating the UTXO and it would be simpler not to have
     // another edge case to deal with.
 
-    // testnet3 has no blocks before the BIP34 height with indicated heights
+    // testnet has no blocks before the BIP34 height with indicated heights
     // post BIP34 before approximately height 486,000,000. After block
-    // 1,983,702 testnet3 starts doing unnecessary BIP30 checking again.
+    // 1,983,702 testnet starts doing unnecessary BIP30 checking again.
     assert(pindex->pprev);
     CBlockIndex* pindexBIP34height = pindex->pprev->GetAncestor(m_params.GetConsensus().BIP34Height);
     //Only continue to enforce if we're below BIP34 activation height or the block hash at that height doesn't correspond.
