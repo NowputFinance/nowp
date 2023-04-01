@@ -383,5 +383,3 @@ jobs:
           prerelease: true
           name: "${{ steps.detect.outputs.release-title }}"
           files: ${{ steps.detect.outputs.tag-name }}/*
-
-          ````````````````````
