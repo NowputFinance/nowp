@@ -19,7 +19,7 @@ env:
   USE_DOCKER: 1
 
 jobs:
-  build-ubuntu22:
+  build-ubuntu-22:
     runs-on: ubuntu-22.04
     container: docker:stable-dind
     strategy:
@@ -128,7 +128,7 @@ jobs:
           if-no-files-found: error
   docker-22:
     runs-on: ubuntu-22.04
-    needs: [binary]
+    needs: [build-ubuntu-22]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -208,7 +208,7 @@ jobs:
           .
   appimage-22:
     runs-on: ubuntu-22.04
-    needs: [binary]
+    needs: [build-ubuntu-22]
     strategy:
       matrix:
         name:
@@ -274,7 +274,7 @@ jobs:
           retention-days: 5
   release-22:
     runs-on: ubuntu-22.04
-    needs: [binary, appimage]
+    needs: [build-ubuntu-22, appimage-22]
     if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release-') }}
     steps:
       - name: Detect env
