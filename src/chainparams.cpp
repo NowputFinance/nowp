@@ -106,14 +106,14 @@ public:
 
         consensus.nTargetTimespan = 24 * 60 * 60;  // one day
         consensus.nStakeTargetSpacing = 2 * 60; // 2-minute block spacing
-        consensus.nTargetSpacingWorkMax = 12 * consensus.nStakeTargetSpacing; // 2-hour
+        consensus.nTargetSpacingWorkMax = 12 * consensus.nStakeTargetSpacing; // 24 minutes
         consensus.nPowTargetSpacing = consensus.nStakeTargetSpacing;
-        consensus.nStakeMinAge = 60; //60 * 60 * 24 * 14; // minimum age for coin age
+        consensus.nStakeMinAge = 60 * 60 * 24 * 14; // minimum age for coin age
         consensus.nStakeMaxAge = 60 * 60 * 24 * 90; // maximum age for coin age
         consensus.nModifierInterval = 6 * 60 * 60; // Modifier interval: time to elapse before new modifier is computed
         consensus.nCoinbaseMaturity = 200;
         consensus.nSubsidyHalvingInterval = 525600;
-        consensus.nPoSActivationHeight = 5000;
+        consensus.nPoSActivationHeight = 10000;
         consensus.nPowDGWHeight = 60;
         consensus.DGWBlocksAvg = 60;
         consensus.fPowAllowMinDifficultyBlocks = false;
@@ -202,13 +202,13 @@ public:
         consensus.powLimit =            uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.bnInitialHashTarget = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nTargetTimespan = 24 * 60 * 60;  // one day
-        consensus.nStakeTargetSpacing = 2 * 60;  // 10-minute block spacing
-        consensus.nTargetSpacingWorkMax = 12 * consensus.nStakeTargetSpacing; // 2-hour
+        consensus.nStakeTargetSpacing = 2 * 60;  // 2-minute block spacing
+        consensus.nTargetSpacingWorkMax = 12 * consensus.nStakeTargetSpacing; // 24 minutes
         consensus.nPowTargetSpacing = consensus.nStakeTargetSpacing;
         consensus.nStakeMinAge = 60 * 60; // test net min age is 1 hour
         consensus.nStakeMaxAge = 60 * 60 * 24 * 90;
         consensus.nModifierInterval = 60 * 20; // Modifier interval: time to elapse before new modifier is computed
-        consensus.nCoinbaseMaturity = 60;
+        consensus.nCoinbaseMaturity = 100;
         consensus.nSubsidyHalvingInterval = 21600;
         consensus.nPoSActivationHeight = 5000;
         consensus.nPowDGWHeight = 60;
@@ -217,7 +217,7 @@ public:
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 1512; // 75% for testchains
         consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing
-        consensus.SegwitHeight = 394215;
+        consensus.SegwitHeight = 394215; //5500;
         consensus.nMinimumChainWork = uint256S("0x00");
         consensus.defaultAssumeValid = uint256S("0x00");
 

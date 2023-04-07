@@ -59,7 +59,7 @@ jobs:
         if: ${{ matrix.os == 'osx' }}
         run: wget -N https://bitcoincore.org/depends-sources/sdks/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers.tar.gz -O ${GITIAN_DIR}/inputs/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers.tar.gz
 
-      - uses: actions/checkout@v3
+      - uses: actions/master
 
       - name: Detect suite
         id: detect
@@ -130,7 +130,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [build-ubuntu-22]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@master
         with:
           repository: nowp/packaging
 
@@ -229,7 +229,7 @@ jobs:
             sources_repo: http://archive.ubuntu.com/ubuntu
             apt_arch: amd64
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/master
         with:
           repository: nowp/packaging
 
@@ -304,7 +304,7 @@ jobs:
         if: ${{ steps.detect.outputs.tag-name != 'noop' }}
         run: sudo apt-get update && sudo apt-get install -y mktorrent gpg bash
 
-      - uses: actions/checkout@v3
+      - uses: actions/master
         if: ${{ steps.detect.outputs.tag-name != 'noop' }}
 
       - uses: actions/download-artifact@v3
@@ -424,7 +424,7 @@ jobs:
         if: ${{ matrix.os == 'osx' }}
         run: wget -N https://bitcoincore.org/depends-sources/sdks/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers.tar.gz -O ${GITIAN_DIR}/inputs/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers.tar.gz
 
-      - uses: actions/checkout@v3
+      - uses: actions/master
 
       - name: Detect suite
         id: detect
@@ -495,7 +495,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [build-ubuntu-20]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/master
         with:
           repository: nowp/packaging
 
@@ -594,7 +594,7 @@ jobs:
             sources_repo: http://archive.ubuntu.com/ubuntu
             apt_arch: amd64
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/master
         with:
           repository: nowp/packaging
 
@@ -669,7 +669,7 @@ jobs:
         if: ${{ steps.detect.outputs.tag-name != 'noop' }}
         run: sudo apt-get update && sudo apt-get install -y mktorrent gpg bash
 
-      - uses: actions/checkout@v3
+      - uses: actions/master
         if: ${{ steps.detect.outputs.tag-name != 'noop' }}
 
       - uses: actions/download-artifact@v3

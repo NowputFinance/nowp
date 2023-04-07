@@ -241,7 +241,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
     }
 
     int64_t nInterval = params.nTargetTimespan / nTargetSpacing;
-    if (fProofOfStake || pindexLast->IsProofOfWork()) {
+    if (fProofOfStake) {
         bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
         bnNew /= ((nInterval + 1) * nTargetSpacing);
     } else {
