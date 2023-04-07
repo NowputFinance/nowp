@@ -129,7 +129,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
         bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
         bnNew /= ((nInterval + 1) * nTargetSpacing);
     } else {
-        return DarkGravityWave(pindexLast, false, params);
+        return DarkGravityWave(pindexLast, params);
     }
 }
 
