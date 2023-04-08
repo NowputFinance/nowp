@@ -81,7 +81,7 @@ jobs:
       - name: Configure
         run: |
           ./autogen.sh
-          ./configure --disable-tests --disable-gui-tests --prefix=`pwd`/depends/x86_64-pc-linux-gnu
+          ./configure --prefix=`pwd`/depends/x86_64-pc-linux-gnu
 
       - name: Build Binaries
         run: |
