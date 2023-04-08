@@ -342,10 +342,10 @@ jobs:
         run: |
           make deploy
           mkdir -p macos-dmg
-          mv Nowp-Qt.dmg macos-dmg/
+          mv Nowp.dmg macos-dmg/
           cd macos-dmg
-          echo "sha256: `shasum Nowp-Qt.dmg`" >> checksums.txt
-          echo "openssl-sha256: `openssl sha256 Nowp-Qt.dmg`" >> checksums.txt
+          echo "sha256: `shasum Nowp.dmg`" >> checksums.txt
+          echo "openssl-sha256: `openssl sha256 Nowp.dmg`" >> checksums.txt
           cd ..
 
       - name: Upload dmg file
