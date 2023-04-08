@@ -747,7 +747,7 @@ Support for Python 2 has been discontinued for all test files and tools.
 - #13219 `08516e0` bench: Add block assemble benchmark (MarcoFalke)
 - #13530 `b1dc39d` bench: Add missing pow.h header (laanwj)
 - #12686 `2643fa5` Add -ftrapv to CFLAGS and CXXFLAGS when --enable-debug is used. Enable -ftrapv in Travis (practicalswift)
-- #12882 `d96bdd7` Make `test_bitcoin` pass under ThreadSanitzer (clang). Fix lock-order-inversion (potential deadlock) (practicalswift)
+- #12882 `d96bdd7` Make `test_nowp` pass under ThreadSanitzer (clang). Fix lock-order-inversion (potential deadlock) (practicalswift)
 - #13535 `2328039` `wallet_basic`: Specify minimum required amount for listunspent (MarcoFalke)
 - #13551 `c93c360` Fix incorrect documentation for test case `cuckoocache_hit_rate_ok` (practicalswift)
 - #13563 `b330f3f` bench: Simplify coinselection (promag)

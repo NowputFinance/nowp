@@ -136,7 +136,7 @@ releases
 *.gcno
 *.gcda
 /*.info
-test_bitcoin.coverage/
+test_nowp.coverage/
 total.coverage/
 fuzz.coverage/
 coverage_percent.txt

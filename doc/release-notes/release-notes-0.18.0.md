@@ -903,7 +903,7 @@ Changes for particular platforms
 - #14969 Fix `cuckoocache_tests` TSAN failure introduced in 14935 (practicalswift)
 - #14964 Fix race in `mempool_accept` (MarcoFalke)
 - #14829 travis: Enable functional tests in the threadsanitizer (tsan) build job (practicalswift)
-- #14985 Remove `thread_local` from `test_bitcoin` (MarcoFalke)
+- #14985 Remove `thread_local` from `test_nowp` (MarcoFalke)
 - #15005 Bump timeout to run tests in travis thread sanitizer (MarcoFalke)
 - #15013 Avoid race in `p2p_timeouts` (MarcoFalke)
 - #14960 lint/format-strings: Correctly exclude escaped percent symbols (luke-jr)
