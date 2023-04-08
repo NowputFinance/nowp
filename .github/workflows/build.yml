@@ -329,7 +329,7 @@ jobs:
   build-macos:
     name: macOS 13 Build
     needs: get-version
-    runs-on: macos-13
+    runs-on: macos-12
 
     steps:
       - name: Checkout
@@ -348,7 +348,7 @@ jobs:
       - name: Configure
         run: |
           ./autogen.sh
-          ./configure --disable-tests --disable-gui-tests --prefix=`pwd`/depends/x86_64-apple-darwin20.6.0
+          ./configure --disable-tests --disable-gui-tests --prefix=`pwd`/depends/x86_64-apple-darwin
 
       - name: Build Binaries
         run: |
@@ -423,7 +423,7 @@ jobs:
   test-macos:
     name: macOS Tests
     needs: [ get-version, build-macos ]
-    runs-on: macos-13
+    runs-on: macos-12
 
     steps:
       - name: Download Artifacts
