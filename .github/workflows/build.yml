@@ -81,7 +81,7 @@ jobs:
       - name: Configure
         run: |
           ./autogen.sh
-          ./configure --prefix=`pwd`/depends/x86_64-pc-linux-gnu
+          ./configure --disable-tests --disable-gui-tests --prefix=`pwd`/depends/x86_64-pc-linux-gnu
 
       - name: Build Binaries
         run: |
@@ -97,7 +97,7 @@ jobs:
           make clean
           make distclean
           ./autogen.sh
-          ./configure --prefix=`pwd`/depends/x86_64-pc-linux-gnu --disable-tests --enable-debug
+          ./configure  --disable-tests --disable-gui-tests --enable-debug --prefix=`pwd`/depends/x86_64-pc-linux-gnu
           make -j$(nproc)
           mkdir -p ${BUILD_DIR}_debug
           mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_debug/
@@ -215,7 +215,7 @@ jobs:
       - name: Configure
         run: |
           ./autogen.sh
-          ./configure --prefix=`pwd`/depends/x86_64-pc-linux-gnu
+          ./configure --disable-tests --disable-gui-tests --prefix=`pwd`/depends/x86_64-pc-linux-gnu
 
       - name: Build Binaries
         run: |
@@ -231,7 +231,7 @@ jobs:
           make clean
           make distclean
           ./autogen.sh
-          ./configure --prefix=`pwd`/depends/x86_64-pc-linux-gnu --disable-tests --enable-debug
+          ./configure --disable-tests --disable-gui-tests --enable-debug --prefix=`pwd`/depends/x86_64-pc-linux-gnu
           make -j$(nproc)
           mkdir -p ${BUILD_DIR}_debug
           mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_debug/
@@ -343,12 +343,12 @@ jobs:
       - name: Build Depends
         run: |
           echo "building with 8 threads"
-          make -C depends -j8 HOST=x86_64-apple-darwin20.6.0
+          make -C depends -j8 HOST=x86_64-apple-darwin
 
       - name: Configure
         run: |
           ./autogen.sh
-          ./configure --prefix=`pwd`/depends/x86_64-apple-darwin20.6.0
+          ./configure --disable-tests --disable-gui-tests --prefix=`pwd`/depends/x86_64-apple-darwin20.6.0
 
       - name: Build Binaries
         run: |
@@ -475,7 +475,7 @@ jobs:
       - name: Configure
         run: |
           ./autogen.sh
-          ./configure --prefix=`pwd`/depends/aarch64-linux-gnu
+          ./configure --disable-tests --disable-gui-tests--prefix=`pwd`/depends/aarch64-linux-gnu
 
       - name: Build Binaries
         run: |
@@ -489,7 +489,7 @@ jobs:
           make clean
           make distclean
           ./autogen.sh
-          ./configure --prefix=`pwd`/depends/aarch64-linux-gnu --disable-tests --enable-debug
+          ./configure --disable-tests --disable-gui-tests --enable-debug --prefix=`pwd`/depends/aarch64-linux-gnu
           make -j$(nproc)
           mkdir -p ${BUILD_DIR}_debug
           mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_debug/
@@ -604,7 +604,7 @@ jobs:
       - name: Configure
         run: |
           ./autogen.sh
-          ./configure --prefix=`pwd`/depends/x86_64-w64-mingw32
+          ./configure --disable-tests --disable-gui-tests --prefix=`pwd`/depends/x86_64-w64-mingw32
 
       - name: Build Binaries
         run: |
