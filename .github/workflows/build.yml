@@ -343,7 +343,7 @@ jobs:
       - name: Build Depends
         run: |
           echo "building with 8 threads"
-          make -C depends -j8 HOST=x86_64-apple-darwin
+          make -C depends -j8
 
       - name: Configure
         run: |
