@@ -97,7 +97,7 @@ jobs:
           make clean
           make distclean
           ./autogen.sh
-          ./configure  --disable-tests --disable-gui-tests --enable-debug --prefix=`pwd`/depends/x86_64-pc-linux-gnu
+          ./configure  --disable-tests --disable-gui-tests --prefix=`pwd`/depends/x86_64-pc-linux-gnu
           make -j$(nproc)
           mkdir -p ${BUILD_DIR}_debug
           mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_debug/
@@ -231,7 +231,7 @@ jobs:
           make clean
           make distclean
           ./autogen.sh
-          ./configure --disable-tests --disable-gui-tests --enable-debug --prefix=`pwd`/depends/x86_64-pc-linux-gnu
+          ./configure --disable-tests --disable-gui-tests --prefix=`pwd`/depends/x86_64-pc-linux-gnu
           make -j$(nproc)
           mkdir -p ${BUILD_DIR}_debug
           mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_debug/
@@ -489,7 +489,7 @@ jobs:
           make clean
           make distclean
           ./autogen.sh
-          ./configure --disable-tests --disable-gui-tests --enable-debug --prefix=`pwd`/depends/aarch64-linux-gnu
+          ./configure --disable-tests --disable-gui-tests --prefix=`pwd`/depends/aarch64-linux-gnu
           make -j$(nproc)
           mkdir -p ${BUILD_DIR}_debug
           mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_debug/
