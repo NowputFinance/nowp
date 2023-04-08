@@ -135,7 +135,7 @@ public:
         pchMessageStart[3] = 0x70;//p
         nDefaultPort = 6888;
         nPruneAfterHeight = 100000;
-        m_assumed_blockchain_size = 1;
+        m_assumed_blockchain_size = 2;
 
         genesis = CreateGenesisBlock(1680357188, 1680357192, 747, 0x20001fff, 4, 50 * COIN);
         //FindGenesisBlock(1680357188, 1680357192, 0, 0x20001fff, 4, "main");
@@ -227,7 +227,7 @@ public:
         pchMessageStart[3] = 0x77;//w
         nDefaultPort = 7888;
         nPruneAfterHeight = 1000;
-        m_assumed_blockchain_size = 2;
+        m_assumed_blockchain_size = 1;
 
         genesis = CreateGenesisBlock(1680878473, 1680878480, 1570, 0x20001fff, 4, 50 * COIN);
         //FindGenesisBlock(1680878473, 1680878480, 0, 0x20001fff, 4, "test");
