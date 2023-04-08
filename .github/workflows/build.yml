@@ -282,7 +282,7 @@ jobs:
       - name: Configure
         run: |
           ./autogen.sh
-          ./configure --prefix=`pwd`/depends/x86_64-apple-darwin
+          ./configure --prefix=`pwd`/depends/x86_64-apple-darwin20.6.0
 
       - name: Build Binaries
         run: |
