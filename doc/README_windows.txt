@@ -1,6 +1,6 @@
 Nowp
 
-Copyright (c) 2011-2023 Nowp Developers
+Copyright (c) 2023 Nowp Developers
 Distributed under the MIT software license, see the accompanying
 file COPYING or http://www.opensource.org/licenses/mit-license.php.
 This product includes software developed by the OpenSSL Project for use in
