@@ -51,4 +51,4 @@ situations but should be discussed in public in advance.
 
 See also
 ----------
-- [nowp-seeder](https://github.com/nowp/nowp-seeder) is a reference implementation of a DNS seed.
+- [nowp-seeder](https://github.com/NowputFinance/nowp-seeder) is a reference implementation of a DNS seed.

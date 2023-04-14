@@ -1,6 +1,6 @@
 <!-- This issue tracker is only for technical issues related to reference implementation of the Nowp.
 
-General Nowp questions and/or support requests are best directed to the Nowp Forum: https://talk.nowp.net/.
+General Nowp questions and/or support requests are best directed to the Nowp Forum: https://talk.nowp.org/.
 
 
 Any report, issue or feature request related to the GUI should be reported at

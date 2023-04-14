@@ -261,9 +261,9 @@ jobs:
           path: ${{ env.TEST_DIR }}
 
   build-macos:
-    name: macOS 11 Build
+    name: macOS 12 Build
     needs: get-version
-    runs-on: macos-11
+    runs-on: macos-12
 
     steps:
       - name: Checkout
@@ -282,7 +282,7 @@ jobs:
       - name: Configure
         run: |
           ./autogen.sh
-          ./configure --prefix=`pwd`/depends/x86_64-apple-darwin20.6.0
+          ./configure --prefix=`pwd`/depends/x86_64-apple-darwin
 
       - name: Build Binaries
         run: |

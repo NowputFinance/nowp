@@ -1,12 +1,13 @@
 Upstream-Name: Nowp
-Upstream-Contact: Stichting Nowp Foundation <foundation@nowp.net>
-Source: https://github.com/nowp/nowp
+Upstream-Contact: Stichting Nowp Foundation <foundation@nowp.org>
+Source: https://github.com/NowputFinance/nowp
 
 Files: *
-Copyright: 2011-2023 Nowp Developers
+Copyright: 2023 Nowp Developers
+Copyright: 2011-2023 Peercoin Developers
 Copyright: 2009-2022, Bitcoin Core Developers
 License: Expat
-Comment: The Nowp Developers encompasses the current developers listed on https://github.com/nowp/nowp,
+Comment: The Nowp Developers encompasses the current developers listed on https://github.com/NowputFinance/nowp,
          as well as the numerous contributors to the project.
 
 Files: debian/*

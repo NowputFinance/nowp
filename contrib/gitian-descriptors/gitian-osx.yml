@@ -30,7 +30,7 @@ packages:
 - "libtinfo5"
 - "pigz"
 remotes:
-- "url": "https://github.com/nowp/nowp.git"
+- "url": "https://github.com/NowputFinance/nowp.git"
   "dir": "nowp"
 files:
 - "Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers.tar.gz"

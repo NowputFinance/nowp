@@ -4,7 +4,7 @@ Setup
 ---------------------
 Nowp is the original Nowp client and it builds the backbone of the network. It downloads and, by default, stores the entire history of Nowp transactions (which is currently less than one gigabyte); depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more.
 
-To download Nowp, visit [nowp.net](https://nowp.net/download).
+To download Nowp, visit [nowp.org](https://nowp.org/download).
 
 Running
 ---------------------
@@ -27,7 +27,7 @@ Drag Nowp to your applications folder, and then run Nowp.
 
 ### Need Help?
 
-* See the documentation at the [Nowp Wiki](https://docs.nowp.net/)
+* See the documentation at the [Nowp Wiki](https://docs.nowp.org/)
 for help and more information.
 * Nowp is very similar to bitcoin, so you can use their wiki [Bitcoin Wiki](https://en.bitcoin.it/wiki/Main_Page).
 * Ask for help on [#general](https://nowp.chat/) on nowp.chat.
@@ -64,7 +64,7 @@ The Nowp repo's [root README](/README.md) contains relevant information on the d
 - [Benchmarking](benchmarking.md)
 
 ### Resources
-* Discuss on the [Nowp](https://talk.nowp.net/) forums.
+* Discuss on the [Nowp](https://talk.nowp.org/) forums.
 
 ### Miscellaneous
 - [Assets Attribution](assets-attribution.md)
