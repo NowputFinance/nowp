@@ -228,7 +228,7 @@ BitcoinGUI::BitcoinGUI(interfaces::Node& node, const PlatformStyle *_platformSty
     if(settings.value("bCheckGithub").toBool()) {
         QNetworkAccessManager* nam = new QNetworkAccessManager(this);
         connect(nam, &QNetworkAccessManager::finished, this, &BitcoinGUI::onResult);
-        QUrl url("https://api.github.com/repos/nowp/nowp/releases/latest");
+        QUrl url("https://api.github.com/repos/NowputFinance/nowp/releases/latest");
         nam->get(QNetworkRequest(url));
     }
 
