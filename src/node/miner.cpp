@@ -160,7 +160,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     if (pwallet)  // attemp to find a coinstake
     {
         *pfPoSCancel = true;
-        pblock->nBits = GetNextTargetRequired(pindexPrev, false, chainparams.GetConsensus());
+        pblock->nBits = GetNextTargetRequired(pindexPrev, true, chainparams.GetConsensus());
         CMutableTransaction txCoinStake;
         int64_t nSearchTime = txCoinStake.nTime; // search to current time
         if (nSearchTime > nLastCoinStakeSearchTime)
