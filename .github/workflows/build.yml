@@ -261,9 +261,9 @@ jobs:
           path: ${{ env.TEST_DIR }}
 
   build-macos:
-    name: macOS 12 Build
+    name: macOS 11 Build
     needs: get-version
-    runs-on: macos-12
+    runs-on: macos-11
 
     steps:
       - name: Checkout
@@ -355,9 +355,11 @@ jobs:
           path: macos-dmg
 
   build-arm64-macos:
-    name: macOS 12 Arm Build
+    name: macOS 11 Arm Build
     needs: get-version
-    runs-on: macos-12
+    runs-on: 
+      - macos-11
+      - ARM64
 
     steps:
       - name: Checkout
