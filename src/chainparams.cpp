@@ -210,7 +210,7 @@ public:
         consensus.nModifierInterval = 60; // Modifier interval: time to elapse before new modifier is computed
         consensus.nCoinbaseMaturity = 100;
         consensus.nSubsidyHalvingInterval = 21600;
-        consensus.nPoSActivationHeight = 5000;
+        consensus.nPoSActivationHeight = 11000;
         consensus.nPowDGWHeight = 60;
         consensus.DGWBlocksAvg = 60;
         consensus.fPowAllowMinDifficultyBlocks = true;
