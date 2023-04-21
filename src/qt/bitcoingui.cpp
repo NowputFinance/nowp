@@ -422,7 +422,7 @@ void BitcoinGUI::createActions()
     openChatroomAction->setStatusTip(tr("Open the Nowp Discord chat in a web browser."));
 
     openForumAction = new QAction(tr("&Forum"), this);
-    openForumAction->setStatusTip(tr("Open talk.nowp.org in a web browser."));
+    openForumAction->setStatusTip(tr("Open talk.nowput.org in a web browser."));
 
     m_mask_values_action = new QAction(tr("&Mask values"), this);
     m_mask_values_action->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_M));
@@ -1018,11 +1018,11 @@ void BitcoinGUI::gotoLoadPSBT(bool from_clipboard)
 }
 
 void BitcoinGUI::openWeb() {
-    QDesktopServices::openUrl(QUrl("https://nowp.org"));
+    QDesktopServices::openUrl(QUrl("https://nowput.org"));
 }
 
 void BitcoinGUI::openDonate() {
-    QDesktopServices::openUrl(QUrl("https://www.nowp.org/foundation"));
+    QDesktopServices::openUrl(QUrl("https://www.nowput.org"));
 }
 
 void BitcoinGUI::openChatroom() {
@@ -1030,7 +1030,7 @@ void BitcoinGUI::openChatroom() {
 }
 
 void BitcoinGUI::openForum() {
-    QDesktopServices::openUrl(QUrl("https://talk.nowp.org"));
+    QDesktopServices::openUrl(QUrl("https://nowput.org"));
 }
 
 #endif // ENABLE_WALLET

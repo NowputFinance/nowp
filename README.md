@@ -4,15 +4,15 @@
 [![Continuous Integration](https://github.com/NowputFinance/nowp/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/NowputFinance/nowp/actions/workflows/build.yml)
 
 ### What is Nowp?
-[Nowp](https://nowput..finance) (abbreviated NOWP), is the first [cryptocurrency](https://en.wikipedia.org/wiki/Cryptocurrency) design introducing [proof-of-stake consensus](https://nowp.org/resources#whitepaper) as a security model, with a combined [proof-of-stake](https://nowp.org/resources#whitepaper)/[proof-of-work](https://en.wikipedia.org/wiki/Proof-of-work_system) minting system. Nowp is based on [Bitcoin](https://bitcoin.org), while introducing many important innovations to cryptocurrency field including new security model, energy efficiency, better minting model and more adaptive response to rapid change in network computation power.
+[Nowp](https://nowput..finance) (abbreviated NOWP), is the first [cryptocurrency](https://en.wikipedia.org/wiki/Cryptocurrency) design introducing [proof-of-stake consensus](https://nowput.org/resources#whitepaper) as a security model, with a combined [proof-of-stake](https://nowput.org/resources#whitepaper)/[proof-of-work](https://en.wikipedia.org/wiki/Proof-of-work_system) minting system. Nowp is based on [Bitcoin](https://bitcoin.org), while introducing many important innovations to cryptocurrency field including new security model, energy efficiency, better minting model and more adaptive response to rapid change in network computation power.
 ### Nowp Resources
 * Client and Source:
 [Client Binaries](https://github.com/NowputFinance/nowp/releases),
 [Source Code](https://github.com/NowputFinance/nowp)
-* Documentation: [Nowp Docs](https://docs.nowp.org)
+* Documentation: [Nowp Docs](https://docs.nowput.org)
 * Help: 
-[Forum](https://talk.nowp.org),
-[Intro & Important Links](https://talk.nowp.org/t/what-is-nowp-intro-important-links/2889),
+[Forum](https://talk.nowput.org),
+[Intro & Important Links](https://talk.nowput.org/t/what-is-nowp-intro-important-links/2889),
 [Telegram Chat](https://t.me/nowp)
 
 Testing
@@ -36,10 +36,10 @@ Large changes should have a test plan, and should be tested by somebody other th
 
 * Developers work in their own forks, then submit pull requests when they think their feature or bug fix is ready.
 * If it is a simple/trivial/non-controversial change, then one of the development team members simply pulls it.
-* If it is a more complicated or potentially controversial change, then the change may be discussed in the pull request, or the requester may be asked to start a discussion in the [Nowp Forum](https://talk.nowp.org) for a broader community discussion. 
+* If it is a more complicated or potentially controversial change, then the change may be discussed in the pull request, or the requester may be asked to start a discussion in the [Nowp Forum](https://talk.nowput.org) for a broader community discussion. 
 * The patch will be accepted if there is broad consensus that it is a good thing. Developers should expect to rework and resubmit patches if they don't match the project's coding conventions (see coding.txt) or are controversial.
 * From time to time a pull request will become outdated. If this occurs, and the pull is no longer automatically mergeable; a comment on the pull will be used to issue a warning of closure.  Pull requests closed in this manner will have their corresponding issue labeled 'stagnant'.
-* For development ideas and help see [here](https://talk.nowp.org/c/protocol).
+* For development ideas and help see [here](https://talk.nowput.org/c/protocol).
 
 ## Branches:
 

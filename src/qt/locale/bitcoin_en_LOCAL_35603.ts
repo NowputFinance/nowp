@@ -466,7 +466,7 @@
     </message>
     <message>
         <location line="+1"/>
-        <source>Open https://talk.nowp.org in a web browser.</source>
+        <source>Open https://talk.nowput.org in a web browser.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
