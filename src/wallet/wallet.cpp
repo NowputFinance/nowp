@@ -3164,7 +3164,7 @@ void CWallet::ConnectScriptPubKeyManNotifiers()
 
 // nowp: create coin stake transaction
 typedef std::vector<unsigned char> valtype;
-bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwallet, unsigned int nBits, int64_t nSearchInterval, CMutableTransaction& txNew)
+bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwallet, unsigned int nBits, int64_t nSearchInterval, CMutableTransaction& txNew, CAmount nFees)
 {
     bool bDebug = (gArgs.GetBoolArg("-debug", false) && gArgs.GetBoolArg("-printcoinstake", false));
     // if there are pre signed coinstakes, we'll use them for minting
@@ -3382,7 +3382,7 @@ bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwalle
         if (!GetCoinAge((const CTransaction)txNew, view, nCoinAge, txNew.nTime, true))
             return error("CreateCoinStake : failed to calculate coin age");
 
-        CAmount nReward = GetBlockReward(chainman.ActiveChain().Height(), params);
+        CAmount nReward = nFees + GetBlockReward(chainman.ActiveChain().Height(), params);
         // Refuse to create mint that has zero or negative reward
         if(nReward <= 0) {
             return false;
@@ -3390,18 +3390,16 @@ bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwalle
         nCredit += nReward;
     }
 
-    CAmount nMinFee = 0;
-    CAmount nMinFeeBase = MIN_TX_FEE;
     while(true)
     {
         // Set output amount
         if (txNew.vout.size() == 3)
         {
-            txNew.vout[1].nValue = ((nCredit - nMinFee) / 2 / nMinFeeBase) * nMinFeeBase;
-            txNew.vout[2].nValue = nCredit - nMinFee - txNew.vout[1].nValue;
+            txNew.vout[1].nValue = (nCredit / 2);
+            txNew.vout[2].nValue = nCredit - txNew.vout[1].nValue;
         }
         else
-            txNew.vout[1].nValue = nCredit - nMinFee;
+            txNew.vout[1].nValue = nCredit;
 
         // Sign
         int nIn = 0;
@@ -3416,18 +3414,7 @@ bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwalle
         if (nBytes >= 1000000/5)
             return error("CreateCoinStake : exceeded coinstake size limit");
 
-        // Check enough fee is paid
-        if (nMinFee < GetMinFee(CTransaction(txNew), txNew.nTime) - nMinFeeBase)
-        {
-            nMinFee = GetMinFee(CTransaction(txNew), txNew.nTime) - nMinFeeBase;
-            continue; // try signing again
-        }
-        else
-        {
-            if (bDebug)
-                LogPrintf("CreateCoinStake : fee for coinstake %s\n", FormatMoney(nMinFee).c_str());
-            break;
-        }
+        break; 
     }
 
     // Successfully generated coinstake
