@@ -137,6 +137,20 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     assert(pindexPrev != nullptr);
     nHeight = pindexPrev->nHeight + 1;
 
+    // Add dummy coinbase tx as first transaction
+    pblock->vtx.emplace_back();
+    if (pwallet) {
+        // Add dummy coinstake tx as second transaction
+        pblock->vtx.emplace_back();
+    }
+
+    pblocktemplate->vTxFees.push_back(-1); // updated at end
+    pblocktemplate->vTxSigOpsCost.push_back(-1); // updated at end
+
+    int nPackagesSelected = 0;
+    int nDescendantsUpdated = 0;
+    addPackageTxs(nPackagesSelected, nDescendantsUpdated, pblock->nTime);
+
     // Create coinbase transaction.
     CMutableTransaction coinbaseTx;
     coinbaseTx.vin.resize(1);
@@ -146,13 +160,8 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
     if (pwallet == nullptr) {
         pblock->nBits = GetNextTargetRequired(pindexPrev, false, chainparams.GetConsensus());
-        coinbaseTx.vout[0].nValue = GetBlockReward(nHeight, chainparams.GetConsensus());
+        coinbaseTx.vout[0].nValue = nFees + GetBlockReward(nHeight, chainparams.GetConsensus());
     }
-
-    // Add dummy coinbase tx as first transaction
-    pblock->vtx.emplace_back();
-    pblocktemplate->vTxFees.push_back(-1); // updated at end
-    pblocktemplate->vTxSigOpsCost.push_back(-1); // updated at end
 
     // nowp: if coinstake available add coinstake tx
     static int64_t nLastCoinStakeSearchTime = GetAdjustedTime();  // only initialized at startup
@@ -165,7 +174,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         int64_t nSearchTime = txCoinStake.nTime; // search to current time
         if (nSearchTime > nLastCoinStakeSearchTime)
         {
-            if (pwallet->CreateCoinStake(*m_node->chainman, pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, txCoinStake))
+            if (pwallet->CreateCoinStake(*m_node->chainman, pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, txCoinStake, nFees))
             {
                 const Consensus::Params& consensusParams = chainparams.GetConsensus();
                 if (nHeight >= consensusParams.nPoSActivationHeight &&
@@ -174,7 +183,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
                     // as it would be the same as the block timestamp
                     coinbaseTx.vout[0].SetEmpty();
                     coinbaseTx.nTime = txCoinStake.nTime;
-                    pblock->vtx.push_back(MakeTransactionRef(CTransaction(txCoinStake)));
+                    pblock->vtx[1] = MakeTransactionRef(CTransaction(txCoinStake));
                     *pfPoSCancel = false;
                 }
             }
@@ -204,10 +213,6 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     // TODO: replace this with a call to main to assess validity of a mempool
     // transaction (which in most cases can be a no-op).
     fIncludeWitness = IsBTC16BIPsEnabled(pindexPrev->nTime);
-
-    int nPackagesSelected = 0;
-    int nDescendantsUpdated = 0;
-    addPackageTxs(nPackagesSelected, nDescendantsUpdated, pblock->nTime);
 
     int64_t nTime1 = GetTimeMicros();
 
