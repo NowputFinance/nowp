@@ -197,7 +197,7 @@ public:
         consensus.signet_blocks = false;
         consensus.signet_challenge.clear();
         //consensus.BIP16Height = 0;
-        consensus.BIP34Height = 293368;
+        consensus.BIP34Height = 60;
         consensus.BIP34Hash = uint256S("00000002c0b976c7a5c9878f1cec63fb4d88d68d614aedeaf8158c42d904795e");
         consensus.powLimit =            uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.bnInitialHashTarget = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
@@ -217,7 +217,7 @@ public:
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 1512; // 75% for testchains
         consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing
-        consensus.SegwitHeight = 394215; //5500;
+        consensus.SegwitHeight = 120; //5500;
         consensus.nMinimumChainWork = uint256S("0x00");
         consensus.defaultAssumeValid = uint256S("0x00");
 
@@ -239,6 +239,7 @@ public:
         vFixedSeeds.clear();
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
+        vSeeds.emplace_back("sb.nowput.org");
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,112);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
