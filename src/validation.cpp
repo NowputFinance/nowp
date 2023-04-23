@@ -1398,7 +1398,7 @@ void CChainState::InvalidChainFound(CBlockIndex* pindexNew)
 
     LogPrintf("%s: invalid block=%s  height=%d  log2_trust=%.8g  moneysupply=%s  date=%s  moneysupply=%s\n", __func__,
       pindexNew->GetBlockHash().ToString(), pindexNew->nHeight,
-      log(pindexNew->nChainTrust.getdouble())/log(2.0), 
+      log(pindexNew->nChainTrust.getdouble())/log(2.0),
       FormatMoney(m_chain.Tip()->nMoneySupply),
       FormatISO8601DateTime(pindexNew->GetBlockTime()),
       FormatMoney(pindexNew->nMoneySupply));
@@ -2107,7 +2107,7 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
                              strprintf("CheckBlock() : coinstake reward exceeded %s > %s",
                                        FormatMoney(nStakeReward),
                                        FormatMoney(blockReward)));
-    
+
     if (block.vtx[0]->GetValueOut() > (block.IsProofOfWork() ? blockReward : 0))
         return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cb-amount",
                              strprintf("CheckBlock() : coinbase reward exceeded %s > %s",
@@ -4140,6 +4140,7 @@ void CChainState::LoadExternalBlockFile(FILE* fileIn, FlatFilePos* dbp)
                 std::deque<uint256> queue;
                 queue.push_back(hash);
                 while (!queue.empty()) {
+                    LOCK(cs_main);
                     uint256 head = queue.front();
                     queue.pop_front();
                     std::pair<std::multimap<uint256, FlatFilePos>::iterator, std::multimap<uint256, FlatFilePos>::iterator> range = mapBlocksUnknownParent.equal_range(head);
@@ -4149,7 +4150,6 @@ void CChainState::LoadExternalBlockFile(FILE* fileIn, FlatFilePos* dbp)
                         if (ReadBlockFromDisk(*pblockrecursive, it->second, m_params.GetConsensus())) {
                             LogPrint(BCLog::REINDEX, "%s: Processing out of order child %s of %s\n", __func__, pblockrecursive->GetHash().ToString(),
                                     head.ToString());
-                            LOCK(cs_main);
                             BlockValidationState dummy;
                             if (AcceptBlock(pblockrecursive, dummy, nullptr, true, &it->second, nullptr)) {
                                 nLoaded++;
