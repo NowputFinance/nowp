@@ -1398,7 +1398,7 @@ void CChainState::InvalidChainFound(CBlockIndex* pindexNew)
 
     LogPrintf("%s: invalid block=%s  height=%d  log2_trust=%.8g  moneysupply=%s  date=%s  moneysupply=%s\n", __func__,
       pindexNew->GetBlockHash().ToString(), pindexNew->nHeight,
-      log(pindexNew->nChainTrust.getdouble())/log(2.0), 
+      log(pindexNew->nChainTrust.getdouble())/log(2.0),
       FormatMoney(m_chain.Tip()->nMoneySupply),
       FormatISO8601DateTime(pindexNew->GetBlockTime()),
       FormatMoney(pindexNew->nMoneySupply));
@@ -4134,6 +4134,7 @@ void CChainState::LoadExternalBlockFile(FILE* fileIn, FlatFilePos* dbp)
                 std::deque<uint256> queue;
                 queue.push_back(hash);
                 while (!queue.empty()) {
+                    LOCK(cs_main);
                     uint256 head = queue.front();
                     queue.pop_front();
                     std::pair<std::multimap<uint256, FlatFilePos>::iterator, std::multimap<uint256, FlatFilePos>::iterator> range = mapBlocksUnknownParent.equal_range(head);
