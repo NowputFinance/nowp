@@ -5,6 +5,7 @@
 
 #include <primitives/block.h>
 
+#include <primitives/powcache.h>
 #include <util/strencodings.h>
 #include <hash.h>
 #include <tinyformat.h>
@@ -16,9 +17,33 @@ uint256 CBlockHeader::GetHash() const
     return SerializeHash(tmp);
 }
 
-uint256 CBlockHeader::GetPOWHash() const
+uint256 CBlockHeader::ComputeHash() const
 {
-	return HashGR(BEGIN(nVersion), END(nNonce), hashPrevBlock);
+    return HashGR(BEGIN(nVersion), END(nNonce), hashPrevBlock);
+}
+
+uint256 CBlockHeader::GetPOWHash(bool readCache) const
+{
+    CPowCache& cache(CPowCache::Instance());
+
+    uint256 headerHash = GetHash();
+    uint256 powHash;
+    bool found = false;
+
+    LOCK(cs_pow);
+    if (readCache) {
+        found = cache.get(headerHash, powHash);
+    }
+
+    if (!found || cache.IsValidate()) {
+        uint256 powHash2 = ComputeHash();
+        if (found && powHash2 != powHash) {
+            LogPrintf("PowCache failure: headerHash: %s, from cache: %s, computed: %s, correcting\n", headerHash.ToString(), powHash.ToString(), powHash2.ToString());
+        }
+        cache.insert(headerHash, powHash2);
+        cache.DoMaintenance();
+    }
+    return powHash;
 }
 
 std::string CBlock::ToString() const
