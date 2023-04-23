@@ -5,6 +5,7 @@ valgrind_ctime_test
 *.exe
 *.pdb
 src/*/*.exe
+src/minisketch/test
 src/nowp
 src/nowpd
 src/nowp-cli
