@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - develop
+      - git-workflow
       - 'ft/*'
       - 'bug/*'
       - 'release/*'
