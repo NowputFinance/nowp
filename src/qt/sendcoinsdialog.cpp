@@ -571,6 +571,9 @@ void SendCoinsDialog::clear()
     ui->lineEditCoinControlChange->clear();
     coinControlUpdateLabels();
 
+    // Clear the transactionDetails text box
+    ui->opReturnMsgTextBox->clear();
+
     // Remove entries until only one left
     while(ui->entries->count())
     {

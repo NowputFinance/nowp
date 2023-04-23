@@ -204,11 +204,8 @@ bool Consensus::CheckTxInputs(const CTransaction& tx, TxValidationState& state, 
         uint64_t nCoinAge;
         if (!GetCoinAge(tx, inputs, nCoinAge, nTimeTx))
             return state.Invalid(TxValidationResult::TX_CONSENSUS, "unable to get coin age for coinstake");
-        CAmount nStakeReward = tx.GetValueOut() - nValueIn;
-        CAmount nCoinstakeCost = (GetMinFee(tx, nTimeTx) < PERKB_TX_FEE) ? 0 : (GetMinFee(tx, nTimeTx) - PERKB_TX_FEE);
-        CAmount blockReward = GetBlockReward(nSpendHeight, params);
-        if (nMoneySupply && nStakeReward > blockReward - nCoinstakeCost)
-            return state.Invalid(TxValidationResult::TX_CONSENSUS, "bad-txns-coinstake-too-large");
+        //return the blockreward on the txfee field, this will be used later to validate the reward amount
+        txfee = tx.GetValueOut() - nValueIn;
     }
     else
     {

@@ -2018,6 +2018,7 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
     int64_t nValueOut = 0;
     int nInputs = 0;
     int64_t nSigOpsCost = 0;
+    CAmount nStakeReward = 0;
     blockundo.vtxundo.reserve(block.vtx.size() - 1);
     for (unsigned int i = 0; i < block.vtx.size(); i++)
     {
@@ -2040,7 +2041,9 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
             for (unsigned int i = 0; i < tx.vin.size(); i++)
                 nValueIn += view.AccessCoin(tx.vin[i].prevout).out.nValue;
             nValueOut += tx.GetValueOut();
-            if (!tx.IsCoinStake())
+            if (tx.IsCoinStake())
+                nStakeReward = txfee;
+            else
                 nFees += txfee;
             if (!MoneyRange(nFees)) {
                 LogPrintf("ERROR: %s: accumulated fee in the block out of range.\n", __func__);
@@ -2097,12 +2100,15 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
 
     // nowp: coinbase reward check relocated to CheckBlock()
-    CAmount nCoinbaseCost = 0;
-    //CAmount blockReward = GetBlockReward();
-    if (block.IsProofOfWork())
-        nCoinbaseCost = (GetMinFee(*block.vtx[0], block.nTime) < PERKB_TX_FEE)? 0 : (GetMinFee(*block.vtx[0], block.nTime) - PERKB_TX_FEE);
-    CAmount blockReward = GetBlockReward(pindex->nHeight, m_params.GetConsensus());
-    if (block.vtx[0]->GetValueOut() > (block.IsProofOfWork() ? (blockReward - nCoinbaseCost) : 0))
+    CAmount blockReward = nFees + GetBlockReward(pindex->nHeight, m_params.GetConsensus());
+
+    if (block.IsProofOfStake() && nStakeReward > blockReward)
+        return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cs-amount",
+                             strprintf("CheckBlock() : coinstake reward exceeded %s > %s",
+                                       FormatMoney(nStakeReward),
+                                       FormatMoney(blockReward)));
+    
+    if (block.vtx[0]->GetValueOut() > (block.IsProofOfWork() ? blockReward : 0))
         return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cb-amount",
                              strprintf("CheckBlock() : coinbase reward exceeded %s > %s",
                                        FormatMoney(block.vtx[0]->GetValueOut()),
