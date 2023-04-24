@@ -11,82 +11,48 @@
 #include <util/system.h>
 
 CPowCache* CPowCache::instance = nullptr;
-RecursiveMutex cs_pow;
 
 CPowCache& CPowCache::Instance()
 {
-    if (CPowCache::instance == nullptr)
-    {
-        int64_t maxElements  = gArgs.GetIntArg("-powcachemaxelements",  DEFAULT_POWCACHE_MAX_ELEMENTS);
-        bool    validate     = gArgs.GetBoolArg("-powcachevalidate",    DEFAULT_POWCACHE_VALIDATE);
-        int64_t saveInterval = gArgs.GetIntArg("-powcachesaveinterval", DEFAULT_POWCACHE_SAVE_INTERVAL);
-
-        maxElements = maxElements <= 0 ? DEFAULT_POWCACHE_MAX_ELEMENTS : maxElements;
-
-        CPowCache::instance = new CPowCache(maxElements, validate, saveInterval);
+    if (CPowCache::instance == nullptr) {
+        CPowCache::instance = new CPowCache();
     }
-    return *instance;
+    return *CPowCache::instance;
 }
 
-void CPowCache::Load()
-{
-    fs::path path = gArgs.GetDataDirNet() / "powcache.dat";
-    CAutoFile file(fsbridge::fopen(path, "rb"), SER_DISK, CURRENT_VERSION);
-    if (file.IsNull()) {
-        LogPrintf("PowCache: Unable to load file.  Cache is empty.\n");
-        return;
-    }
-    LOCK(cs_pow);
-    clear();
-    Unserialize(file);
-    nSavedSize = size();
-    LogPrintf("PowCache: Loaded: %d elements\n", size());
-}
-
-void CPowCache::Save()
-{
-    fs::path path = gArgs.GetDataDirNet() / "powcache.dat";
-    CAutoFile file(fsbridge::fopen(path, "wb"), SER_DISK, CURRENT_VERSION);
-    if (file.IsNull()) {
-        LogPrintf("PowCache: Unable to save file.\n");
-        return;
-    }
-    LOCK(cs_pow);
-    Serialize(file);
-    nSavedSize = size();
-    LogPrintf("PowCache: Saved: %d elements\n", size());
-}
-
-void CPowCache::DoMaintenance()
-{
-    LOCK(cs_pow);
-    // If cache has grown enough, save it:
-    if (size() - nSavedSize >= nSaveInterval) {
-        Save();
-    }
-}
-
-CPowCache::CPowCache(int64_t maxElements, bool validate, int64_t saveInterval)
-    : unordered_lru_cache<uint256, uint256, std::hash<uint256>>(maxElements)
+CPowCache::CPowCache()
+    : unordered_lru_cache<uint256, uint256, std::hash<uint256>>(DEFAULT_POWCACHE_MAX_ELEMENTS)
     , nVersion(CURRENT_VERSION)
     , nSavedSize(0)
-    , bValidate(validate)
-    , nSaveInterval(saveInterval)
+    , bValidate(DEFAULT_POWCACHE_VALIDATE)
+    , nSaveInterval(DEFAULT_POWCACHE_SAVE_INTERVAL)
 {
-    if (bValidate) LogPrintf("PowCache: Validation and auto correction enabled\n");
 }
 
 CPowCache::~CPowCache()
 {
 }
 
-void CPowCache::Clear()
+void CPowCache::SetMaxElements(int64_t maxElements)
 {
-    clear();
+    if (maxElements > 0) {
+        maxSize = maxElements;
+    }
 }
 
-void CPowCache::CheckAndRemove()
+void CPowCache::SetValidate(int64_t validate)
 {
+    bValidate = validate;
+}
+
+void CPowCache::SetSaveInterval(int64_t saveInterval)
+{
+    nSaveInterval = saveInterval;
+}
+
+bool CPowCache::WantsToSave() const
+{
+   return size() - nSavedSize >= nSaveInterval;
 }
 
 std::string CPowCache::ToString() const

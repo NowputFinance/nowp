@@ -30,18 +30,17 @@ uint256 CBlockHeader::GetPOWHash(bool readCache) const
     uint256 powHash;
     bool found = false;
 
-    LOCK(cs_pow);
     if (readCache) {
         found = cache.get(headerHash, powHash);
     }
 
-    if (!found || cache.IsValidate()) {
+    if (!found || cache.GetValidate()) {
         uint256 powHash2 = ComputeHash();
         if (found && powHash2 != powHash) {
-            LogPrintf("PowCache failure: headerHash: %s, from cache: %s, computed: %s, correcting\n", headerHash.ToString(), powHash.ToString(), powHash2.ToString());
+            // We cannot use the loggers at this level
+            std::cerr << "PowCache failure: headerHash: " << headerHash.ToString() << ", from cache: " << powHash.ToString() << ", computed: " << powHash2.ToString() << ", correcting" << std::endl;
         }
         cache.insert(headerHash, powHash2);
-        cache.DoMaintenance();
     }
     return powHash;
 }

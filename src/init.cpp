@@ -297,7 +297,18 @@ void Shutdown(NodeContext& node)
 #endif
 
     // Save PowCache
-    CPowCache::Instance().Save();
+    // The PowCache is at a low-level, so we need to handle file I/O and logging here.
+    {
+        CAutoFile file(fsbridge::fopen(gArgs.GetDataDirNet() / "powcache.dat", "wb"), SER_DISK, POWCACHE_CURRENT_VERSION);
+        if (file.IsNull()) {
+            LogPrintf("%s: Unable to save to file\n", CPowCache::Instance().ToString());
+        }
+        else
+        {
+            CPowCache::Instance().Serialize(file);
+            LogPrintf("%s: Saved\n", CPowCache::Instance().ToString());
+        }
+    }
 
     node.chain_clients.clear();
     UnregisterAllValidationInterfaces();
@@ -1128,8 +1139,31 @@ bool AppInitMain(NodeContext& node, interfaces::BlockAndHeaderTipInfo* tip_info)
         client->registerRpcs();
     }
 
-    // Load PowCache:
-    CPowCache::Instance().Load();
+    // Create and load PowCache
+    // The PowCache is at a low-level, so we need to handle file I/O and logging here.
+    {
+        int64_t maxElements  = gArgs.GetIntArg("-powcachemaxelements",  DEFAULT_POWCACHE_MAX_ELEMENTS);
+        bool    validate     = gArgs.GetBoolArg("-powcachevalidate",    DEFAULT_POWCACHE_VALIDATE);
+        int64_t saveInterval = gArgs.GetIntArg("-powcachesaveinterval", DEFAULT_POWCACHE_SAVE_INTERVAL);
+        if (maxElements <= 0) {
+           maxElements = DEFAULT_POWCACHE_MAX_ELEMENTS;
+        }
+
+        CPowCache::Instance().SetMaxElements(maxElements);
+        CPowCache::Instance().SetValidate(validate);
+        CPowCache::Instance().SetSaveInterval(saveInterval);
+
+        CAutoFile file(fsbridge::fopen(gArgs.GetDataDirNet() / "powcache.dat", "rb"), SER_DISK, POWCACHE_CURRENT_VERSION);
+        if (file.IsNull()) {
+            LogPrintf("%s: Unable to load from file\n", CPowCache::Instance().ToString());
+        }
+        else
+        {
+            CPowCache::Instance().Unserialize(file);
+            LogPrintf("%s: Loaded\n", CPowCache::Instance().ToString());
+        }
+        // nowpTODO: Add Scheduler to check for periodic saves
+    }
 
 #if ENABLE_ZMQ
     RegisterZMQRPCCommands(tableRPC);
