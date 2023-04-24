@@ -132,7 +132,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: 0xcircuitbreaker/packaging
+          repository: 0xcircuitbreaker/nowp@master
 
       - uses: actions/download-artifact@v3
         with:
@@ -231,7 +231,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: 0xcircuitbreaker/packaging
+          repository: 0xcircuitbreaker/nowp@master
 
       - uses: actions/download-artifact@v3
         with:
