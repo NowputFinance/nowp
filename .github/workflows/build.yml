@@ -132,7 +132,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: 0xcircuitbreaker/nowp@master
+          repository: 0xcircuitbreaker/packaging
 
       - uses: actions/download-artifact@v3
         with:
@@ -231,7 +231,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: 0xcircuitbreaker/nowp@master
+          repository: 0xcircuitbreaker/packaging
 
       - uses: actions/download-artifact@v3
         with:
@@ -274,7 +274,7 @@ jobs:
           retention-days: 5
   release:
     runs-on: ubuntu-20.04
-    needs: [binary]
+    needs: [binary, appimage]
     if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release-') }}
     steps:
       - name: Detect env
