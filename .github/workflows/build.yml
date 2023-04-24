@@ -126,152 +126,152 @@ jobs:
             !*-unsigned.tar.gz
           retention-days: 5
           if-no-files-found: error
-  # docker:
-  #   runs-on: ubuntu-20.04
-  #   needs: [binary]
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         repository: nowp/git-workflow
+  docker:
+    runs-on: ubuntu-20.04
+    needs: [binary]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: nowp/master
 
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         path: docker
+      - uses: actions/download-artifact@v3
+        with:
+          path: docker
 
-  #     - name: Place artifacts
-  #       working-directory: docker
-  #       run: |
-  #         mkdir -p linux/amd64 linux/arm/v7 linux/arm64
-  #         mv nowp-*-x86_64-linux/nowp-*-x86_64-linux-gnu.tar.gz linux/amd64/
-  #         mv nowp-*-armhf-linux/nowp-*-arm-linux-gnueabihf.tar.gz linux/arm/v7/
-  #         mv nowp-*-aarch64-linux/nowp-*-aarch64-linux-gnu.tar.gz linux/arm64/
+      - name: Place artifacts
+        working-directory: docker
+        run: |
+          mkdir -p linux/amd64 linux/arm/v7 linux/arm64
+          mv nowp-*-x86_64-linux/nowp-*-x86_64-linux-gnu.tar.gz linux/amd64/
+          mv nowp-*-armhf-linux/nowp-*-arm-linux-gnueabihf.tar.gz linux/arm/v7/
+          mv nowp-*-aarch64-linux/nowp-*-aarch64-linux-gnu.tar.gz linux/arm64/
 
-  #     - uses: docker/setup-qemu-action@v2
-  #       with:
-  #         platforms: arm,arm64
+      - uses: docker/setup-qemu-action@v2
+        with:
+          platforms: arm,arm64
 
-  #     - uses: docker/setup-buildx-action@v2
-  #       with:
-  #         platforms: linux/amd64,linux/arm64,linux/arm/v7
+      - uses: docker/setup-buildx-action@v2
+        with:
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
 
-  #     - name: Detect env
-  #       id: detect
-  #       shell: bash
-  #       run: |
-  #         PUSH=false
-  #         TAG_NAME=blank
-  #         if [[ $GITHUB_REF == refs/heads/develop ]]; then
-  #           PUSH=true
-  #           TAG_NAME=develop
-  #         fi
-  #         if [[ $GITHUB_REF == refs/heads/master ]]; then
-  #           PUSH=true
-  #           TAG_NAME=latest
-  #         fi
-  #         if [[ $GITHUB_REF == refs/heads/release-* ]]; then
-  #           PUSH=true
-  #           TAG_NAME=${GITHUB_REF/refs\/heads\//}
-  #         fi
-  #         if [[ $GITHUB_REF == refs/tags/v* ]]; then
-  #           PUSH=true
-  #           TAG_NAME=${GITHUB_REF/refs\/tags\//}
-  #           TAG_NAME=${TAG_NAME/nowp\./}
-  #           TAG_NAME=${TAG_NAME/nowp/}
-  #           TAG_NAME=${TAG_NAME/v/}
-  #         fi
-  #         echo "push=${PUSH}" >> $GITHUB_OUTPUT
-  #         echo "tag-name=${TAG_NAME}" >> $GITHUB_OUTPUT
+      - name: Detect env
+        id: detect
+        shell: bash
+        run: |
+          PUSH=false
+          TAG_NAME=blank
+          if [[ $GITHUB_REF == refs/heads/develop ]]; then
+            PUSH=true
+            TAG_NAME=develop
+          fi
+          if [[ $GITHUB_REF == refs/heads/master ]]; then
+            PUSH=true
+            TAG_NAME=latest
+          fi
+          if [[ $GITHUB_REF == refs/heads/release-* ]]; then
+            PUSH=true
+            TAG_NAME=${GITHUB_REF/refs\/heads\//}
+          fi
+          if [[ $GITHUB_REF == refs/tags/v* ]]; then
+            PUSH=true
+            TAG_NAME=${GITHUB_REF/refs\/tags\//}
+            TAG_NAME=${TAG_NAME/nowp\./}
+            TAG_NAME=${TAG_NAME/nowp/}
+            TAG_NAME=${TAG_NAME/v/}
+          fi
+          echo "push=${PUSH}" >> $GITHUB_OUTPUT
+          echo "tag-name=${TAG_NAME}" >> $GITHUB_OUTPUT
 
-  #     - name: Login to Docker Hub
-  #       uses: docker/login-action@v2
-  #       if: steps.detect.outputs.push == 'true'
-  #       with:
-  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
-  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        if: steps.detect.outputs.push == 'true'
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  #     - name: Login to GitHub Container Registry
-  #       uses: docker/login-action@v2
-  #       if: steps.detect.outputs.push == 'true'
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.actor }}
-  #         password: ${{ github.token }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        if: steps.detect.outputs.push == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
 
-  #     - name: Build and push
-  #       working-directory: docker
-  #       run: |
-  #         docker buildx build --platform linux/amd64,linux/arm/v7,linux/arm64 \
-  #           --output "type=image,push=${{ steps.detect.outputs.push }}" \
-  #           --progress=plain \
-  #           --tag nowp/nowpd:${{ steps.detect.outputs.tag-name }} \
-  #           --tag ghcr.io/${{ github.repository }}/nowpd:${{ steps.detect.outputs.tag-name }} \
-  #         .
-  # appimage:
-  #   runs-on: ubuntu-20.04
-  #   needs: [binary]
-  #   strategy:
-  #     matrix:
-  #       name:
-  #         - armhf
-  #         - aarch64
-  #         - x86_64
-  #       include:
-  #         - name: armhf
-  #           host: arm-linux-gnueabihf
-  #           sources_repo: http://ports.ubuntu.com/ubuntu-ports
-  #           apt_arch: armhf
-  #         - name: aarch64
-  #           host: aarch64-linux-gnu
-  #           sources_repo: http://ports.ubuntu.com/ubuntu-ports
-  #           apt_arch: arm64
-  #         - name: x86_64
-  #           host: x86_64-linux-gnu
-  #           sources_repo: http://archive.ubuntu.com/ubuntu
-  #           apt_arch: amd64
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         repository: nowp/git-workflow
+      - name: Build and push
+        working-directory: docker
+        run: |
+          docker buildx build --platform linux/amd64,linux/arm/v7,linux/arm64 \
+            --output "type=image,push=${{ steps.detect.outputs.push }}" \
+            --progress=plain \
+            --tag nowp/nowpd:${{ steps.detect.outputs.tag-name }} \
+            --tag ghcr.io/${{ github.repository }}/nowpd:${{ steps.detect.outputs.tag-name }} \
+          .
+  appimage:
+    runs-on: ubuntu-20.04
+    needs: [binary]
+    strategy:
+      matrix:
+        name:
+          - armhf
+          - aarch64
+          - x86_64
+        include:
+          - name: armhf
+            host: arm-linux-gnueabihf
+            sources_repo: http://ports.ubuntu.com/ubuntu-ports
+            apt_arch: armhf
+          - name: aarch64
+            host: aarch64-linux-gnu
+            sources_repo: http://ports.ubuntu.com/ubuntu-ports
+            apt_arch: arm64
+          - name: x86_64
+            host: x86_64-linux-gnu
+            sources_repo: http://archive.ubuntu.com/ubuntu
+            apt_arch: amd64
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: nowp/master
 
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         path: appimage
+      - uses: actions/download-artifact@v3
+        with:
+          path: appimage
 
-  #     - name: Set up environment
-  #       working-directory: appimage
-  #       run: |
-  #         pip3 install --upgrade pyOpenSSL git+https://github.com/AppImageCrafters/appimage-builder@3396839c9e3419f4bd726cb129e54e6da4212e48
+      - name: Set up environment
+        working-directory: appimage
+        run: |
+          pip3 install --upgrade pyOpenSSL git+https://github.com/AppImageCrafters/appimage-builder@3396839c9e3419f4bd726cb129e54e6da4212e48
 
-  #     - name: Detect env
-  #       id: detect
-  #       shell: bash
-  #       run: |
-  #         SHA8=$(echo ${{ github.sha }} | cut -c1-8)
-  #         TAG_NAME=$SHA8
-  #         if [[ $GITHUB_REF == refs/tags/v* ]]; then
-  #           TAG_NAME=${GITHUB_REF/refs\/tags\//}
-  #           TAG_NAME=${TAG_NAME/nowp\./}
-  #           TAG_NAME=${TAG_NAME/nowp/}
-  #           TAG_NAME=${TAG_NAME/v/}
-  #         fi
-  #         echo "sha8=$SHA8" >> $GITHUB_OUTPUT
-  #         echo "tag-name=$TAG_NAME" >> $GITHUB_OUTPUT
-  #         echo "build-dir=${PWD}" >> $GITHUB_OUTPUT
+      - name: Detect env
+        id: detect
+        shell: bash
+        run: |
+          SHA8=$(echo ${{ github.sha }} | cut -c1-8)
+          TAG_NAME=$SHA8
+          if [[ $GITHUB_REF == refs/tags/v* ]]; then
+            TAG_NAME=${GITHUB_REF/refs\/tags\//}
+            TAG_NAME=${TAG_NAME/nowp\./}
+            TAG_NAME=${TAG_NAME/nowp/}
+            TAG_NAME=${TAG_NAME/v/}
+          fi
+          echo "sha8=$SHA8" >> $GITHUB_OUTPUT
+          echo "tag-name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "build-dir=${PWD}" >> $GITHUB_OUTPUT
 
-  #     - name: Build AppImage
-  #       working-directory: appimage
-  #       run: |
-  #         tar xzf nowp-${{ steps.detect.outputs.sha8 }}-${{ matrix.name }}-linux/nowp-*-${{ matrix.host }}.tar.gz -C AppDir --strip-components=1
-  #         find AppDir/bin ! -name 'nowp-qt' -type f -exec rm -f {} +
-  #         VERSION=${{ steps.detect.outputs.tag-name }} SOURCES_REPO=${{ matrix.sources_repo }} APT_ARCH=${{ matrix.apt_arch }} BUILD_ARCH=${{ matrix.name }} appimage-builder --skip-tests
-  #         mv *.AppImage ${{ steps.detect.outputs.build-dir }}/
+      - name: Build AppImage
+        working-directory: appimage
+        run: |
+          tar xzf nowp-${{ steps.detect.outputs.sha8 }}-${{ matrix.name }}-linux/nowp-*-${{ matrix.host }}.tar.gz -C AppDir --strip-components=1
+          find AppDir/bin ! -name 'nowp-qt' -type f -exec rm -f {} +
+          VERSION=${{ steps.detect.outputs.tag-name }} SOURCES_REPO=${{ matrix.sources_repo }} APT_ARCH=${{ matrix.apt_arch }} BUILD_ARCH=${{ matrix.name }} appimage-builder --skip-tests
+          mv *.AppImage ${{ steps.detect.outputs.build-dir }}/
 
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: nowp-appimage-${{ steps.detect.outputs.tag-name }}-${{ matrix.name }}
-  #         path: |
-  #           *.AppImage
-  #         retention-days: 5
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nowp-appimage-${{ steps.detect.outputs.tag-name }}-${{ matrix.name }}
+          path: |
+            *.AppImage
+          retention-days: 5
   release:
     runs-on: ubuntu-20.04
     needs: [binary]
