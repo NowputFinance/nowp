@@ -354,91 +354,91 @@ jobs:
           name: ${{ env.COIN_NAME }}-dmg-${{ needs.get-version.outputs.version }}
           path: macos-dmg
 
-  build-arm-64:
-    name: ARM 64-bit Build
-    needs: get-version
-    runs-on: ubuntu-20.04
+  # build-arm-64:
+  #   name: ARM 64-bit Build
+  #   needs: get-version
+  #   runs-on: ubuntu-20.04
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
 
-      - name: Install Required Packages
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install curl build-essential libtool g++-aarch64-linux-gnu autotools-dev automake pkg-config python3 bsdmainutils cmake -y
+  #     - name: Install Required Packages
+  #       run: |
+  #         sudo apt-get update -y
+  #         sudo apt-get install curl build-essential libtool g++-aarch64-linux-gnu autotools-dev automake pkg-config python3 bsdmainutils cmake -y
 
-      - name: Build Depends
-        run: |
-          echo "building with $(nproc) threads"
-          make -C depends -j$(nproc) HOST=aarch64-linux-gnu
+  #     - name: Build Depends
+  #       run: |
+  #         echo "building with $(nproc) threads"
+  #         make -C depends -j$(nproc) HOST=aarch64-linux-gnu
 
-      - name: Configure
-        run: |
-          ./autogen.sh
-          ./configure --prefix=`pwd`/depends/aarch64-linux-gnu
+  #     - name: Configure
+  #       run: |
+  #         ./autogen.sh
+  #         ./configure --prefix=`pwd`/depends/aarch64-linux-gnu
 
-      - name: Build Binaries
-        run: |
-          make -j$(nproc)
-          mkdir -p ${BUILD_DIR} ${TEST_DIR}
-          mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}/
-          mv src/test/test_nowp ${TEST_DIR}/
+  #     - name: Build Binaries
+  #       run: |
+  #         make -j$(nproc)
+  #         mkdir -p ${BUILD_DIR} ${TEST_DIR}
+  #         mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}/
+  #         mv src/test/test_nowp ${TEST_DIR}/
 
-      - name: Build Debug Binaries
-        run: |
-          make clean
-          make distclean
-          ./autogen.sh
-          ./configure --prefix=`pwd`/depends/aarch64-linux-gnu
-          make -j$(nproc)
-          mkdir -p ${BUILD_DIR}_debug
-          mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_debug/
+  #     - name: Build Debug Binaries
+  #       run: |
+  #         make clean
+  #         make distclean
+  #         ./autogen.sh
+  #         ./configure --prefix=`pwd`/depends/aarch64-linux-gnu
+  #         make -j$(nproc)
+  #         mkdir -p ${BUILD_DIR}_debug
+  #         mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_debug/
 
-      - name: Generate Checksum and Compress
-        run: |
-          mkdir -p ${COMPRESS_DIR}
-          cd ${BUILD_DIR}
-          echo "sha256:" >> checksums.txt
-          echo "------------------------------------" >> checksums.txt
-          shasum * >> checksums.txt
-          echo "------------------------------------" >> checksums.txt
-          echo "openssl-sha256:" >> checksums.txt
-          echo "------------------------------------" >> checksums.txt
-          sha256sum * >> checksums.txt
-          cat checksums.txt
-          tar -cvzf ../${COIN_NAME}-arm64-${{ needs.get-version.outputs.version }}.tar.gz *          
-          cd ../${BUILD_DIR}_debug
-          echo "sha256:" >> checksums.txt
-          echo "------------------------------------" >> checksums.txt
-          shasum * >> checksums.txt
-          echo "------------------------------------" >> checksums.txt
-          echo "openssl-sha256:" >> checksums.txt
-          echo "------------------------------------" >> checksums.txt
-          sha256sum * >> checksums.txt
-          cat checksums.txt
-          tar -cvzf ../${COIN_NAME}-arm64-debug-${{ needs.get-version.outputs.version }}.tar.gz *
-          cd ..
-          mv *.tar.gz ${COMPRESS_DIR}/
-          cd ${COMPRESS_DIR}
-          echo "sha256: `shasum ${COIN_NAME}-arm64-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
-          echo "openssl-sha256: `sha256sum ${COIN_NAME}-arm64-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
-          echo "sha256: `shasum ${COIN_NAME}-arm64-debug-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
-          echo "openssl-sha256: `sha256sum ${COIN_NAME}-arm64-debug-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
-          cd ..
-          cat ${COMPRESS_DIR}/checksums.txt
+  #     - name: Generate Checksum and Compress
+  #       run: |
+  #         mkdir -p ${COMPRESS_DIR}
+  #         cd ${BUILD_DIR}
+  #         echo "sha256:" >> checksums.txt
+  #         echo "------------------------------------" >> checksums.txt
+  #         shasum * >> checksums.txt
+  #         echo "------------------------------------" >> checksums.txt
+  #         echo "openssl-sha256:" >> checksums.txt
+  #         echo "------------------------------------" >> checksums.txt
+  #         sha256sum * >> checksums.txt
+  #         cat checksums.txt
+  #         tar -cvzf ../${COIN_NAME}-arm64-${{ needs.get-version.outputs.version }}.tar.gz *          
+  #         cd ../${BUILD_DIR}_debug
+  #         echo "sha256:" >> checksums.txt
+  #         echo "------------------------------------" >> checksums.txt
+  #         shasum * >> checksums.txt
+  #         echo "------------------------------------" >> checksums.txt
+  #         echo "openssl-sha256:" >> checksums.txt
+  #         echo "------------------------------------" >> checksums.txt
+  #         sha256sum * >> checksums.txt
+  #         cat checksums.txt
+  #         tar -cvzf ../${COIN_NAME}-arm64-debug-${{ needs.get-version.outputs.version }}.tar.gz *
+  #         cd ..
+  #         mv *.tar.gz ${COMPRESS_DIR}/
+  #         cd ${COMPRESS_DIR}
+  #         echo "sha256: `shasum ${COIN_NAME}-arm64-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+  #         echo "openssl-sha256: `sha256sum ${COIN_NAME}-arm64-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+  #         echo "sha256: `shasum ${COIN_NAME}-arm64-debug-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+  #         echo "openssl-sha256: `sha256sum ${COIN_NAME}-arm64-debug-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+  #         cd ..
+  #         cat ${COMPRESS_DIR}/checksums.txt
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.COIN_NAME }}-arm64-${{ needs.get-version.outputs.version }}
-          path: ${{ env.COMPRESS_DIR }}
+  #     - name: Upload Artifacts
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: ${{ env.COIN_NAME }}-arm64-${{ needs.get-version.outputs.version }}
+  #         path: ${{ env.COMPRESS_DIR }}
   
-      - name: Upload Test Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.COIN_NAME }}-arm64-test-${{ needs.get-version.outputs.version }}
-          path: ${{ env.TEST_DIR }}
+  #     - name: Upload Test Artifacts
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: ${{ env.COIN_NAME }}-arm64-test-${{ needs.get-version.outputs.version }}
+  #         path: ${{ env.TEST_DIR }}
 
   build-win64:
     name: Win64 Build
