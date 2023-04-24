@@ -206,75 +206,75 @@ jobs:
   #           --tag nowp/nowpd:${{ steps.detect.outputs.tag-name }} \
   #           --tag ghcr.io/${{ github.repository }}/nowpd:${{ steps.detect.outputs.tag-name }} \
   #         .
-  appimage:
-    runs-on: ubuntu-20.04
-    needs: [binary]
-    strategy:
-      matrix:
-        name:
-          - armhf
-          - aarch64
-          - x86_64
-        include:
-          - name: armhf
-            host: arm-linux-gnueabihf
-            sources_repo: http://ports.ubuntu.com/ubuntu-ports
-            apt_arch: armhf
-          - name: aarch64
-            host: aarch64-linux-gnu
-            sources_repo: http://ports.ubuntu.com/ubuntu-ports
-            apt_arch: arm64
-          - name: x86_64
-            host: x86_64-linux-gnu
-            sources_repo: http://archive.ubuntu.com/ubuntu
-            apt_arch: amd64
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          repository: nowp/git-workflow
+  # appimage:
+  #   runs-on: ubuntu-20.04
+  #   needs: [binary]
+  #   strategy:
+  #     matrix:
+  #       name:
+  #         - armhf
+  #         - aarch64
+  #         - x86_64
+  #       include:
+  #         - name: armhf
+  #           host: arm-linux-gnueabihf
+  #           sources_repo: http://ports.ubuntu.com/ubuntu-ports
+  #           apt_arch: armhf
+  #         - name: aarch64
+  #           host: aarch64-linux-gnu
+  #           sources_repo: http://ports.ubuntu.com/ubuntu-ports
+  #           apt_arch: arm64
+  #         - name: x86_64
+  #           host: x86_64-linux-gnu
+  #           sources_repo: http://archive.ubuntu.com/ubuntu
+  #           apt_arch: amd64
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         repository: nowp/git-workflow
 
-      - uses: actions/download-artifact@v3
-        with:
-          path: appimage
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         path: appimage
 
-      - name: Set up environment
-        working-directory: appimage
-        run: |
-          pip3 install --upgrade pyOpenSSL git+https://github.com/AppImageCrafters/appimage-builder@3396839c9e3419f4bd726cb129e54e6da4212e48
+  #     - name: Set up environment
+  #       working-directory: appimage
+  #       run: |
+  #         pip3 install --upgrade pyOpenSSL git+https://github.com/AppImageCrafters/appimage-builder@3396839c9e3419f4bd726cb129e54e6da4212e48
 
-      - name: Detect env
-        id: detect
-        shell: bash
-        run: |
-          SHA8=$(echo ${{ github.sha }} | cut -c1-8)
-          TAG_NAME=$SHA8
-          if [[ $GITHUB_REF == refs/tags/v* ]]; then
-            TAG_NAME=${GITHUB_REF/refs\/tags\//}
-            TAG_NAME=${TAG_NAME/nowp\./}
-            TAG_NAME=${TAG_NAME/nowp/}
-            TAG_NAME=${TAG_NAME/v/}
-          fi
-          echo "sha8=$SHA8" >> $GITHUB_OUTPUT
-          echo "tag-name=$TAG_NAME" >> $GITHUB_OUTPUT
-          echo "build-dir=${PWD}" >> $GITHUB_OUTPUT
+  #     - name: Detect env
+  #       id: detect
+  #       shell: bash
+  #       run: |
+  #         SHA8=$(echo ${{ github.sha }} | cut -c1-8)
+  #         TAG_NAME=$SHA8
+  #         if [[ $GITHUB_REF == refs/tags/v* ]]; then
+  #           TAG_NAME=${GITHUB_REF/refs\/tags\//}
+  #           TAG_NAME=${TAG_NAME/nowp\./}
+  #           TAG_NAME=${TAG_NAME/nowp/}
+  #           TAG_NAME=${TAG_NAME/v/}
+  #         fi
+  #         echo "sha8=$SHA8" >> $GITHUB_OUTPUT
+  #         echo "tag-name=$TAG_NAME" >> $GITHUB_OUTPUT
+  #         echo "build-dir=${PWD}" >> $GITHUB_OUTPUT
 
-      - name: Build AppImage
-        working-directory: appimage
-        run: |
-          tar xzf nowp-${{ steps.detect.outputs.sha8 }}-${{ matrix.name }}-linux/nowp-*-${{ matrix.host }}.tar.gz -C AppDir --strip-components=1
-          find AppDir/bin ! -name 'nowp-qt' -type f -exec rm -f {} +
-          VERSION=${{ steps.detect.outputs.tag-name }} SOURCES_REPO=${{ matrix.sources_repo }} APT_ARCH=${{ matrix.apt_arch }} BUILD_ARCH=${{ matrix.name }} appimage-builder --skip-tests
-          mv *.AppImage ${{ steps.detect.outputs.build-dir }}/
+  #     - name: Build AppImage
+  #       working-directory: appimage
+  #       run: |
+  #         tar xzf nowp-${{ steps.detect.outputs.sha8 }}-${{ matrix.name }}-linux/nowp-*-${{ matrix.host }}.tar.gz -C AppDir --strip-components=1
+  #         find AppDir/bin ! -name 'nowp-qt' -type f -exec rm -f {} +
+  #         VERSION=${{ steps.detect.outputs.tag-name }} SOURCES_REPO=${{ matrix.sources_repo }} APT_ARCH=${{ matrix.apt_arch }} BUILD_ARCH=${{ matrix.name }} appimage-builder --skip-tests
+  #         mv *.AppImage ${{ steps.detect.outputs.build-dir }}/
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: nowp-appimage-${{ steps.detect.outputs.tag-name }}-${{ matrix.name }}
-          path: |
-            *.AppImage
-          retention-days: 5
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: nowp-appimage-${{ steps.detect.outputs.tag-name }}-${{ matrix.name }}
+  #         path: |
+  #           *.AppImage
+  #         retention-days: 5
   release:
     runs-on: ubuntu-20.04
-    needs: [binary, appimage]
+    needs: [binary]
     if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release-') }}
     steps:
       - name: Detect env
