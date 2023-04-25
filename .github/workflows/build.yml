@@ -283,7 +283,7 @@ jobs:
         run: |
           TAG_NAME=noop
           RELEASE_TITLE=noop
-          if [[ $GITHUB_REF == refs/heads/develop || $GITHUB_REF == refs/heads/release-* ]]; then
+          if [[ $GITHUB_REF == refs/heads/master || $GITHUB_REF == refs/heads/release-* ]]; then
             TAG_NAME=latest
             RELEASE_TITLE="Development Build: ${GITHUB_REF/refs\/heads\//}"
           fi
@@ -351,7 +351,7 @@ jobs:
 
       - name: Check latest
         id: detect-publish-latest
-        if: ${{ steps.detect.outputs.tag-name != 'noop' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release-')) }}
+        if: ${{ steps.detect.outputs.tag-name != 'noop' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release-')) }}
         run: |
           PUBLISH=noop
           git fetch origin +refs/tags/latest:refs/tags/latest
@@ -367,7 +367,7 @@ jobs:
           git tag -l --format='%(contents)' ${GITHUB_REF/refs\/tags\//} > ${{ github.workspace }}-CHANGELOG.txt
 
       - uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0
-        if: ${{ steps.detect.outputs.tag-name != 'noop' && steps.detect-publish-latest.outputs.publish == 'op' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release-')) }}
+        if: ${{ steps.detect.outputs.tag-name != 'noop' && steps.detect-publish-latest.outputs.publish == 'op' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release-')) }}
         with:
           repo_token: ${{ github.token }}
           automatic_release_tag: ${{ steps.detect.outputs.tag-name }}
