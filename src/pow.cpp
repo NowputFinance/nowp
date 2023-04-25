@@ -57,8 +57,7 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const Consens
     else
         nTargetTimespan *= params.nPowTargetSpacing;
     //NOTE: once PoS is active, block target spacing need to be doubled to maintain 720 block day (360 PoW, 360 PoS)
-    //NOTE: don't aply on current tesnet. remove the && section on next testnet
-    if (pindexLast->nHeight > params.nPoSActivationHeight && Params().NetworkIDString() != CBaseChainParams::TESTNET) 
+    if (pindexLast->nHeight > params.nPoSActivationHeight) 
         nTargetTimespan *= 2;
 
 	if (nActualTimespan < nTargetTimespan/3)
