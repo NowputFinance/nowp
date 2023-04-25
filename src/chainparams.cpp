@@ -202,7 +202,7 @@ public:
         consensus.powLimit =            uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.bnInitialHashTarget = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nTargetTimespan = 24 * 60 * 60;  // one day
-        consensus.nStakeTargetSpacing = 2 * 60;  // 2-minute block spacing
+        consensus.nStakeTargetSpacing = 1 * 60;  // 2-minute block spacing
         consensus.nTargetSpacingWorkMax = 12 * consensus.nStakeTargetSpacing; // 24 minutes
         consensus.nPowTargetSpacing = consensus.nStakeTargetSpacing;
         consensus.nStakeMinAge = 60 * 60 * 2; // test net min age is 1 hour
@@ -210,7 +210,7 @@ public:
         consensus.nModifierInterval = 60; // Modifier interval: time to elapse before new modifier is computed
         consensus.nCoinbaseMaturity = 100;
         consensus.nSubsidyHalvingInterval = 21600;
-        consensus.nPoSActivationHeight = 11000;
+        consensus.nPoSActivationHeight = 5000;
         consensus.nPowDGWHeight = 60;
         consensus.DGWBlocksAvg = 60;
         consensus.fPowAllowMinDifficultyBlocks = true;
