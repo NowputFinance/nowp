@@ -289,8 +289,8 @@ jobs:
           fi
           if [[ $GITHUB_REF == refs/tags/v* ]]; then
             TAG_NAME=${GITHUB_REF/refs\/tags\//}
-            TAG_NAME_NO_DOT=${TAG_NAME//\./}
-            RELEASE_TITLE="Release ${TAG_NAME_NO_DOT}"
+            TAG_NAME_NO_DOT=${TAG_NAME/nowp\./}
+            RELEASE_TITLE="Release ${TAG_NAME_NO_DOT/nowp/}"
           fi
           if [[ -z "${{ secrets.GPG_PRIVATE_KEY }}" ]]; then
             TAG_NAME=noop
@@ -328,9 +328,9 @@ jobs:
 
       - name: Create torrent
        # if: ${{ steps.detect.outputs.tag-name != 'noop' }}
-        run: |
-          rm -rf ${{ steps.detect.outputs.tag-name }}/*
-          mkdir -p ${{ steps.detect.outputs.tag-name }}
+        run: #|
+        #  rm -rf ${{ steps.detect.outputs.tag-name }}/*
+        #  mkdir -p ${{ steps.detect.outputs.tag-name }}
           mv nowp-*-**/nowp-*.tar.gz \
             nowp-*-**/nowp-*.zip \
             nowp-*-**/nowp-*.exe \
