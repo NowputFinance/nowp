@@ -229,11 +229,11 @@ public:
         nPruneAfterHeight = 1000;
         m_assumed_blockchain_size = 1;
 
-        genesis = CreateGenesisBlock(1680878473, 1680878480, 1570, 0x20001fff, 4, 50 * COIN);
-        //FindGenesisBlock(1680878473, 1680878480, 0, 0x20001fff, 4, "test");
+        genesis = CreateGenesisBlock(1682442589, 1682442590, 737, 0x20001fff, 4, 50 * COIN);
+        //FindGenesisBlock(1682442589, 1682442590, 0, 0x20001fff, 4, "test");
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0xbe8c3dd0b0e8e73d476a6b802b80819eba6801b3b5911bb4335b48df47c5459a"));
-        assert(genesis.hashMerkleRoot == uint256S("0x874dea8b378462f4df46ebdbe77993048dfb1fe318a5865dced6d88ca1257ad5"));
+        assert(consensus.hashGenesisBlock == uint256S("0x2a102bd769af981d3b08032f4d5da97f1d5579ebcc30f9721ae4d349565d42e1"));
+        assert(genesis.hashMerkleRoot == uint256S("0x089ed55f3aef44852a200ff16c93bea07ff6401b37a9593e43c6305ff1f9d01a"));
 
 
         vFixedSeeds.clear();
