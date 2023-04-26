@@ -348,16 +348,16 @@ jobs:
       #       -a udp://exodus.desync.com:6969/announce \
       #     ${{ steps.detect.outputs.tag-name }}
 
-      - name: Check latest
-        id: detect-publish-latest
-        #if: ${{ steps.detect.outputs.tag-name != 'noop' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release-')) }}
-        run: |
-          PUBLISH=noop
-          git fetch origin +refs/tags/latest:refs/tags/latest
-          if ! git merge-base --is-ancestor refs/tags/latest HEAD; then
-            PUBLISH=op
-          fi
-          echo "publish=$PUBLISH" >> $GITHUB_OUTPUT
+      # - name: Check latest
+      #   id: detect-publish-latest
+      #   if: ${{ steps.detect.outputs.tag-name != 'noop' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release-')) }}
+      #   run: |
+      #     PUBLISH=noop
+      #     git fetch origin +refs/tags/latest:refs/tags/latest
+      #     if ! git merge-base --is-ancestor refs/tags/latest HEAD; then
+      #       PUBLISH=op
+      #     fi
+      #     echo "publish=$PUBLISH" >> $GITHUB_OUTPUT
 
       - name: Generate Changelog
         if: ${{ steps.detect.outputs.tag-name != 'noop' && startsWith(github.ref, 'refs/tags/v') }}
