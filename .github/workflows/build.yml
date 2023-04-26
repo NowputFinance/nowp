@@ -203,7 +203,7 @@ jobs:
           docker buildx build --platform linux/amd64,linux/arm/v7,linux/arm64 \
             --output "type=image,push=${{ steps.detect.outputs.push }}" \
             --progress=plain \
-            --tag nowp/nowpd:${{ steps.detect.outputs.tag-name }} \
+            --tag circuitbreaker88/nowpd:${{ steps.detect.outputs.tag-name }} \
             --tag ghcr.io/${{ github.repository }}/nowpd:${{ steps.detect.outputs.tag-name }} \
           .
   appimage:
