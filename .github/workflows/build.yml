@@ -350,7 +350,7 @@ jobs:
 
       - name: Check latest
         id: detect-publish-latest
-        if: ${{ steps.detect.outputs.tag-name != 'noop' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release-')) }}
+        #if: ${{ steps.detect.outputs.tag-name != 'noop' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release-')) }}
         run: |
           PUBLISH=noop
           git fetch origin +refs/tags/latest:refs/tags/latest
