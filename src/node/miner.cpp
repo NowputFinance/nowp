@@ -166,32 +166,32 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     // nowp: if coinstake available add coinstake tx
     static int64_t nLastCoinStakeSearchTime = GetAdjustedTime();  // only initialized at startup
 
-    if (pwallet)  // attemp to find a coinstake
+    if (pwallet)  // attempt to find a coinstake
     {
         *pfPoSCancel = true;
         pblock->nBits = GetNextTargetRequired(pindexPrev, true, chainparams.GetConsensus());
         CMutableTransaction txCoinStake;
         int64_t nSearchTime = txCoinStake.nTime; // search to current time
-        if (nSearchTime > nLastCoinStakeSearchTime)
+        const Consensus::Params& consensusParams = chainparams.GetConsensus();
+
+        if (nSearchTime > nLastCoinStakeSearchTime && nHeight >= consensusParams.nPoSActivationHeight)
         {
-            if (pwallet->CreateCoinStake(*m_node->chainman, pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, txCoinStake, nFees))
-            {
-                const Consensus::Params& consensusParams = chainparams.GetConsensus();
-                if (nHeight >= consensusParams.nPoSActivationHeight &&
-                    txCoinStake.nTime >= std::max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - MAX_FUTURE_BLOCK_TIME ))
-                {   // make sure coinstake would meet timestamp protocol
-                    // as it would be the same as the block timestamp
-                    coinbaseTx.vout[0].SetEmpty();
-                    coinbaseTx.nTime = txCoinStake.nTime;
-                    pblock->vtx[1] = MakeTransactionRef(CTransaction(txCoinStake));
-                    *pfPoSCancel = false;
-                }
-            }
-            nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
-            nLastCoinStakeSearchTime = nSearchTime;
+         if (pwallet->CreateCoinStake(*m_node->chainman, pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, txCoinStake, nFees))
+         {
+             if (txCoinStake.nTime >= std::max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - MAX_FUTURE_BLOCK_TIME))
+             {   // make sure coinstake would meet timestamp protocol
+                 // as it would be the same as the block timestamp
+                 coinbaseTx.vout[0].SetEmpty();
+                 coinbaseTx.nTime = txCoinStake.nTime;
+                 pblock->vtx[1] = MakeTransactionRef(CTransaction(txCoinStake));
+                 *pfPoSCancel = false;
+             }
+         }
+         nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
+         nLastCoinStakeSearchTime = nSearchTime;
         }
         if (*pfPoSCancel)
-            return nullptr; // nowp: there is no point to continue if we failed to create coinstake
+         return nullptr; // nowp: there is no point to continue if we failed to create coinstake
         pblock->nFlags = CBlockIndex::BLOCK_PROOF_OF_STAKE;
     }
 
@@ -579,6 +579,11 @@ void PoSMiner(std::shared_ptr<CWallet> pwallet, NodeContext& m_node)
     {
         strMintWarning = strMintDisabledMessage;
         LogPrintf("proof-of-stake minter disabled\n");
+        return;
+    }
+
+    if(!pwallet->GetLegacyScriptPubKeyMan()){
+        LogPrintf("proof-of-stake minter disabled. Descriptor wallet not supported\n");
         return;
     }
 
