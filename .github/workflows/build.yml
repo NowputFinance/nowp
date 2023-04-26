@@ -328,8 +328,7 @@ jobs:
 
       - name: Create torrent
        # if: ${{ steps.detect.outputs.tag-name != 'noop' }}
-        run: #|
-        #  rm -rf ${{ steps.detect.outputs.tag-name }}/*
+        run: |
           mkdir -p ${{ steps.detect.outputs.tag-name }}
           mv nowp-*-**/nowp-*.tar.gz \
             nowp-*-**/nowp-*.zip \
