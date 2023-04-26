@@ -330,7 +330,7 @@ jobs:
        # if: ${{ steps.detect.outputs.tag-name != 'noop' }}
         run: #|
         #  rm -rf ${{ steps.detect.outputs.tag-name }}/*
-        #  mkdir -p ${{ steps.detect.outputs.tag-name }}
+          mkdir -p ${{ steps.detect.outputs.tag-name }}
           mv nowp-*-**/nowp-*.tar.gz \
             nowp-*-**/nowp-*.zip \
             nowp-*-**/nowp-*.exe \
