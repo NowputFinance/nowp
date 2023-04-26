@@ -1,385 +1,538 @@
-name: Nowp Release
-
+name: Nowp Build
 on:
   push:
-    paths-ignore:
-      - '**/*.md'
+    branches:
+      - master
+      - develop
+      - 'ft/*'
+      - 'bug/*'
+      - 'release/*'
   pull_request:
-    paths-ignore:
-      - 'doc/**'
-      - 'contrib/**'
-      - '**/*.md'
-
+    branches:
+      - develop
 env:
-  MAKEJOBS: 3
-  DOCKER_BUILDKIT: 1
-  GITIAN_DIR: /opt/gitian-builder
-  GITIAN_CACHE: /opt/gitian-builder/cache
-  DEBIAN_FRONTEND: noninteractive
-  USE_DOCKER: 1
+  COIN_NAME: nowp
+  BUILD_DIR: nowp-build
+  COMPRESS_DIR: nowp-compress
+  TEST_DIR: nowp-test
 
 jobs:
-  binary:
-    runs-on: ubuntu-20.04
-    container: docker:stable-dind
-    strategy:
-      matrix:
-        name:
-          - armhf-linux
-          - aarch64-linux
-          - x86_64-linux
-          - x86_64-macos
-          - x86_64-win
-        include:
-          - os: linux
-            name: armhf-linux
-            host: arm-linux-gnueabihf
-          - os: linux
-            name: aarch64-linux
-            host: aarch64-linux-gnu
-          - os: linux
-            name: x86_64-linux
-            host: x86_64-linux-gnu
-          - os: osx
-            name: x86_64-macos
-            host: x86_64-apple-darwin16
-          - os: win
-            name: x86_64-win
-            host: x86_64-w64-mingw32
+  get-version:
+    name: Get Version
+    runs-on: ubuntu-latest
     steps:
-      - name: Set up environment
+      - name: Triggered By
         run: |
-          apk add --no-cache curl make ruby wget git sed tar grep bash
-          git clone https://github.com/devrandom/gitian-builder.git ${GITIAN_DIR}
-          mkdir -p ${GITIAN_DIR}/inputs ${GITIAN_DIR}/var
-          wget https://github.com/mikefarah/yq/releases/download/v4.13.5/yq_linux_amd64.tar.gz -O - |\
-            tar xz && mv yq_linux_amd64 /usr/bin/yq
+          echo "checking out $GITHUB_REF triggered by $GITHUB_EVENT_NAME"
 
-      - name: Fetch OSX SDK
-        if: ${{ matrix.os == 'osx' }}
-        run: wget -N https://bitcoincore.org/depends-sources/sdks/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers.tar.gz -O ${GITIAN_DIR}/inputs/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers.tar.gz
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - uses: actions/checkout@v3
+      - name: Read versions
+        id: versions
+        uses: christian-draeger/read-properties@1.1.1
+        with:
+          path: build.properties
+          properties: 'release-version candidate-version snapshot-version'
 
-      - name: Detect suite
-        id: detect
+      - name: Choose version
+        id: selected-version
         shell: bash
         run: |
-          DESCRIPTOR=$PWD/contrib/gitian-descriptors/gitian-${{ matrix.os }}.yml
-          NAME=$(yq e '.name' ${DESCRIPTOR})
-          COMMIT_OR_TAG=$(git log --format="%H" -n 1)
-          FETCH_TAGS=""
-          if [[ $GITHUB_REF == refs/tags/v* ]]; then
-            COMMIT_OR_TAG=$(echo ${GITHUB_REF/refs\/tags\//})
-            FETCH_TAGS="--fetch-tags"
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]] || [[ "$GITHUB_REF" == *develop ]] || [[ "$GITHUB_REF" == *ft/* ]] || [[ "$GITHUB_REF" == *bug/* ]]; then
+              version=${{ steps.versions.outputs.snapshot-version }}
+          elif [[ "$GITHUB_EVENT_NAME" != "pull_request" ]] && [[ "$GITHUB_REF" == *"release/"* ]]; then
+              version=${{ steps.versions.outputs.candidate-version }}
+          elif [[ "$GITHUB_EVENT_NAME" != "pull_request" ]] && [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+              version=${{ steps.versions.outputs.release-version }}
           fi
-          echo "descriptor=${DESCRIPTOR}" >> $GITHUB_OUTPUT
-          echo "name=${NAME}" >> $GITHUB_OUTPUT
-          echo "version=$(echo ${NAME} | grep -Eo [0-9.]+)" >> $GITHUB_OUTPUT
-          echo "suite=$(yq e '.suites[0]' ${DESCRIPTOR})" >> $GITHUB_OUTPUT
-          echo "architecture=$(yq e '.architectures[0]' ${DESCRIPTOR})" >> $GITHUB_OUTPUT
-          echo "build-dir=${PWD}" >> $GITHUB_OUTPUT
-          echo "commit-or-tag=${COMMIT_OR_TAG}" >> $GITHUB_OUTPUT
-          echo "fetch-tags=${FETCH_TAGS}" >> $GITHUB_OUTPUT
+          echo "version is: [$version]"
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "BUILD_VERSION=$version" > version.txt
 
-      - name: Build gitian base image
-        run: |
-          docker build --tag base-${{ steps.detect.outputs.suite }}-${{ steps.detect.outputs.architecture }} -<<EOF
-            FROM ubuntu:${{ steps.detect.outputs.suite }}
-            ENV DEBIAN_FRONTEND=noninteractive
-            RUN apt-get update && apt-get --no-install-recommends -y install pciutils build-essential git subversion language-pack-en wget lsb-release
-            RUN useradd -ms /bin/bash -U ubuntu
-            USER ubuntu:ubuntu
-            WORKDIR /home/ubuntu
-            CMD ["sleep", "infinity"]
-          EOF
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        id: gitian-deps
-        env:
-          cache-name: gitian-host
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
         with:
-          path: ${{ env.GITIAN_CACHE }}/${{ steps.detect.outputs.name }}/${{ matrix.host }}
-          key: ${{ matrix.name }}-${{ env.cache-name }}-${{ hashFiles('depends/packages/*') }}
+          name: version
+          path: version.txt
 
-      - name: Build binary
-        working-directory: ${{ env.GITIAN_DIR }}
-        run: |
-          sed -i "s/^\ \ \(HOSTS=\"\).*/\ \ \1${{ matrix.host }}\"/g" ${{ steps.detect.outputs.descriptor }}
-          ./bin/gbuild -j $MAKEJOBS ${{ steps.detect.outputs.fetch-tags }} --commit nowp=${{ steps.detect.outputs.commit-or-tag }} --url nowp=${{ github.server_url }}/${{ github.repository }} ${{ steps.detect.outputs.descriptor }}
-          cp -r ${GITIAN_DIR}/build/out/* ${{ steps.detect.outputs.build-dir }}/
+    outputs:
+      version: ${{ steps.selected-version.outputs.version }}
 
-      - name: Get short SHA
-        id: slug
-        run: echo "sha8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_OUTPUT
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: nowp-${{ steps.slug.outputs.sha8 }}-${{ matrix.name }}
-          path: |
-            *.tar.gz
-            *.zip
-            *.exe
-            *.dmg
-            !*-debug*
-            !*-unsigned.tar.gz
-          retention-days: 5
-          if-no-files-found: error
-  docker:
+  build-ubuntu20:
+    name: Ubuntu 20 Build
+    needs: get-version
     runs-on: ubuntu-20.04
-    needs: [binary]
+
     steps:
-      - uses: actions/checkout@v3
-        with:
-          repository: 0xcircuitbreaker/packaging
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - uses: actions/download-artifact@v3
-        with:
-          path: docker
-
-      - name: Place artifacts
-        working-directory: docker
+      - name: Install Required Packages
         run: |
-          mkdir -p linux/amd64 linux/arm/v7 linux/arm64
-          mv nowp-*-x86_64-linux/nowp-*-x86_64-linux-gnu.tar.gz linux/amd64/
-          mv nowp-*-armhf-linux/nowp-*-arm-linux-gnueabihf.tar.gz linux/arm/v7/
-          mv nowp-*-aarch64-linux/nowp-*-aarch64-linux-gnu.tar.gz linux/arm64/
-
-      - uses: docker/setup-qemu-action@v2
-        with:
-          platforms: arm,arm64
-
-      - uses: docker/setup-buildx-action@v2
-        with:
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
-
-      - name: Detect env
-        id: detect
-        shell: bash
+          sudo apt-get update -y
+          sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 -y
+      - name: Build Depends
         run: |
-          PUSH=false
-          TAG_NAME=blank
-          if [[ $GITHUB_REF == refs/heads/develop ]]; then
-            PUSH=true
-            TAG_NAME=develop
-          fi
-          if [[ $GITHUB_REF == refs/heads/master ]]; then
-            PUSH=true
-            TAG_NAME=latest
-          fi
-          if [[ $GITHUB_REF == refs/heads/release-* ]]; then
-            PUSH=true
-            TAG_NAME=${GITHUB_REF/refs\/heads\//}
-          fi
-          if [[ $GITHUB_REF == refs/tags/v* ]]; then
-            PUSH=true
-            TAG_NAME=${GITHUB_REF/refs\/tags\//}
-            TAG_NAME=${TAG_NAME/nowp\./}
-            TAG_NAME=${TAG_NAME/nowp/}
-            TAG_NAME=${TAG_NAME/v/}
-          fi
-          echo "push=${PUSH}" >> $GITHUB_OUTPUT
-          echo "tag-name=${TAG_NAME}" >> $GITHUB_OUTPUT
+          echo "building with $(nproc) threads"
+          gcc --version
+          make -C depends -j$(nproc)  HOST=x86_64-pc-linux-gnu
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        if: steps.detect.outputs.push == 'true'
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # - name: Login to GitHub Container Registry
-      #   uses: docker/login-action@v2
-      #   if: steps.detect.outputs.push == 'true'
-      #   with:
-      #     registry: ghcr.io
-      #     username: ${{ github.actor }}
-      #     password: ${{ github.token }}
-
-      - name: Build and push
-        working-directory: docker
+      - name: Configure
         run: |
-          docker buildx build --platform linux/amd64,linux/arm/v7,linux/arm64 \
-            --output "type=image,push=${{ steps.detect.outputs.push }}" \
-            --progress=plain \
-            --tag 0xcircuitbreaker/nowpd:${{ steps.detect.outputs.tag-name }} \
-            .
-        #    --tag ghcr.io/${{ github.repository }}/nowpd:${{ steps.detect.outputs.tag-name }} \
-        #  .
-  appimage:
+          ./autogen.sh
+          ./configure --prefix=`pwd`/depends/x86_64-pc-linux-gnu
+
+      - name: Build Binaries
+        run: |
+          make -j$(nproc)
+          mkdir -p ${BUILD_DIR} ${BUILD_DIR}_not_strip ${TEST_DIR}
+          cp src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}/
+          mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_not_strip/
+          mv src/test/test_nowp ${TEST_DIR}
+          strip ${BUILD_DIR}/*
+
+      - name: Build Debug Binaries
+        run: |
+          make clean
+          make distclean
+          ./autogen.sh
+          ./configure --prefix=`pwd`/depends/x86_64-pc-linux-gnu
+          make -j$(nproc)
+          mkdir -p ${BUILD_DIR}_debug
+          mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_debug/
+
+      - name: Generate Checksum and Compress
+        run: |
+          mkdir -p ${COMPRESS_DIR}
+          cd ${BUILD_DIR}
+          echo "sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          shasum * >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          echo "openssl-sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          sha256sum * >> checksums.txt
+          cat checksums.txt
+          tar -cvzf ../${COIN_NAME}-ubuntu20-${{ needs.get-version.outputs.version }}.tar.gz *          
+          cd ../${BUILD_DIR}_debug
+          echo "sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          shasum * >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          echo "openssl-sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          sha256sum * >> checksums.txt
+          cat checksums.txt
+          tar -cvzf ../${COIN_NAME}-ubuntu20-debug-${{ needs.get-version.outputs.version }}.tar.gz *
+          cd ../${BUILD_DIR}_not_strip
+          echo "sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          shasum * >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          echo "openssl-sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          sha256sum * >> checksums.txt
+          cat checksums.txt
+          tar -cvzf ../${COIN_NAME}-ubuntu20-not_strip-${{ needs.get-version.outputs.version }}.tar.gz *
+          cd ..
+          mv *.tar.gz ${COMPRESS_DIR}/
+          cd ${COMPRESS_DIR}
+          echo "sha256: `shasum ${COIN_NAME}-ubuntu20-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "openssl-sha256: `sha256sum ${COIN_NAME}-ubuntu20-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "sha256: `shasum ${COIN_NAME}-ubuntu20-debug-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "openssl-sha256: `sha256sum ${COIN_NAME}-ubuntu20-debug-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "sha256: `shasum ${COIN_NAME}-ubuntu20-not_strip-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "openssl-sha256: `sha256sum ${COIN_NAME}-ubuntu20-not_strip-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          cd ..
+          cat ${COMPRESS_DIR}/checksums.txt
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.COIN_NAME }}-ubuntu20-${{ needs.get-version.outputs.version }}
+          path: ${{ env.COMPRESS_DIR }}
+
+      - name: Upload Test Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.COIN_NAME }}-ubuntu20-test-${{ needs.get-version.outputs.version }}
+          path: ${{ env.TEST_DIR }}
+
+  build-ubuntu22:
+    name: Ubuntu 22 Build
+    needs: get-version
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Required Packages
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 -y
+
+      - name: Build Depends
+        run: |
+          echo "building with $(nproc) threads"
+          gcc --version
+          make -C depends -j$(nproc)  HOST=x86_64-pc-linux-gnu
+
+      - name: Configure
+        run: |
+          ./autogen.sh
+          ./configure --prefix=`pwd`/depends/x86_64-pc-linux-gnu
+
+      - name: Build Binaries
+        run: |
+          make -j$(nproc)
+          mkdir -p ${BUILD_DIR} ${BUILD_DIR}_not_strip ${TEST_DIR}
+          cp src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}/
+          mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_not_strip/
+          mv src/test/test_nowp ${TEST_DIR}
+          strip ${BUILD_DIR}/*
+
+      - name: Build Debug Binaries
+        run: |
+          make clean
+          make distclean
+          ./autogen.sh
+          ./configure --prefix=`pwd`/depends/x86_64-pc-linux-gnu
+          make -j$(nproc)
+          mkdir -p ${BUILD_DIR}_debug
+          mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_debug/
+
+      - name: Generate Checksum and Compress
+        run: |
+          mkdir -p ${COMPRESS_DIR}
+          cd ${BUILD_DIR}
+          echo "sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          shasum * >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          echo "openssl-sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          sha256sum * >> checksums.txt
+          cat checksums.txt
+          tar -cvzf ../${COIN_NAME}-ubuntu22-${{ needs.get-version.outputs.version }}.tar.gz *          
+          cd ../${BUILD_DIR}_debug
+          echo "sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          shasum * >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          echo "openssl-sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          sha256sum * >> checksums.txt
+          cat checksums.txt
+          tar -cvzf ../${COIN_NAME}-ubuntu22-debug-${{ needs.get-version.outputs.version }}.tar.gz *
+          cd ../${BUILD_DIR}_not_strip
+          echo "sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          shasum * >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          echo "openssl-sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          sha256sum * >> checksums.txt
+          cat checksums.txt
+          tar -cvzf ../${COIN_NAME}-ubuntu22-not_strip-${{ needs.get-version.outputs.version }}.tar.gz *
+          cd ..
+          mv *.tar.gz ${COMPRESS_DIR}/
+          cd ${COMPRESS_DIR}
+          echo "sha256: `shasum ${COIN_NAME}-ubuntu22-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "openssl-sha256: `sha256sum ${COIN_NAME}-ubuntu22-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "sha256: `shasum ${COIN_NAME}-ubuntu22-debug-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "openssl-sha256: `sha256sum ${COIN_NAME}-ubuntu22-debug-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "sha256: `shasum ${COIN_NAME}-ubuntu22-not_strip-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "openssl-sha256: `sha256sum ${COIN_NAME}-ubuntu22-not_strip-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          cd ..
+          cat ${COMPRESS_DIR}/checksums.txt
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.COIN_NAME }}-ubuntu22-${{ needs.get-version.outputs.version }}
+          path: ${{ env.COMPRESS_DIR }}
+
+      - name: Upload Test Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.COIN_NAME }}-ubuntu22-test-${{ needs.get-version.outputs.version }}
+          path: ${{ env.TEST_DIR }}
+
+  build-macos:
+    name: macOS 11 Build
+    needs: get-version
+    runs-on: macos-11
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Required Packages
+        run: |
+          brew install automake libtool pkg-config miniupnpc librsvg libnatpmp zeromq python
+          pip3 install ds_store mac_alias
+
+      - name: Build Depends
+        run: |
+          echo "building with 8 threads"
+          make -C depends -j8
+
+      - name: Configure
+        run: |
+          ./autogen.sh
+          ./configure --prefix=`pwd`/depends/x86_64-apple-darwin20.6.0
+
+      - name: Build Binaries
+        run: |
+          make -j8
+          mkdir -p ${BUILD_DIR} ${BUILD_DIR}_not_strip ${TEST_DIR}
+          cp src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}/
+          mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_not_strip/
+          mv src/test/test_nowp ${TEST_DIR}
+          strip ${BUILD_DIR}/*
+
+      - name: Generate Checksum and Compress
+        run: |
+          cd ${BUILD_DIR}
+          echo "sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          shasum * >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          echo "openssl-sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          openssl sha256 * >> checksums.txt
+          cat checksums.txt
+          tar -cvzf ../${COIN_NAME}-macos-${{ needs.get-version.outputs.version }}.tar.gz *
+          cd ../${BUILD_DIR}_not_strip
+          echo "sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          shasum * >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          echo "openssl-sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          openssl sha256 * >> checksums.txt
+          cat checksums.txt
+          tar -cvzf ../${COIN_NAME}-macos-not_strip-${{ needs.get-version.outputs.version }}.tar.gz *
+          cd ..
+          mkdir -p ${COMPRESS_DIR}
+          mv *.tar.gz ${COMPRESS_DIR}/
+          cd ${COMPRESS_DIR}
+          echo "sha256: `shasum ${COIN_NAME}-macos-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "openssl-sha256: `openssl sha256 ${COIN_NAME}-macos-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "sha256: `shasum ${COIN_NAME}-macos-not_strip-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "openssl-sha256: `openssl sha256 ${COIN_NAME}-macos-not_strip-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          cat checksums.txt
+          cd ..
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.COIN_NAME }}-macos-${{ needs.get-version.outputs.version }}
+          path: ${{ env.COMPRESS_DIR }}
+
+      - name: Upload Test Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.COIN_NAME }}-macos-test-${{ needs.get-version.outputs.version }}
+          path: ${{ env.TEST_DIR }}
+
+      - name: Generate Macos dmg files
+        run: |
+          make deploy
+          mkdir -p macos-dmg
+          mv Nowp-Qt.dmg macos-dmg/
+          cd macos-dmg
+          echo "sha256: `shasum Nowp-Qt.dmg`" >> checksums.txt
+          echo "openssl-sha256: `openssl sha256 Nowp-Qt.dmg`" >> checksums.txt
+          cd ..
+
+      - name: Upload dmg file
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.COIN_NAME }}-dmg-${{ needs.get-version.outputs.version }}
+          path: macos-dmg
+
+  build-arm-64:
+    name: ARM 64-bit Build
+    needs: get-version
     runs-on: ubuntu-20.04
-    needs: [binary]
-    strategy:
-      matrix:
-        name:
-          - armhf
-          - aarch64
-          - x86_64
-        include:
-          - name: armhf
-            host: arm-linux-gnueabihf
-            sources_repo: http://ports.ubuntu.com/ubuntu-ports
-            apt_arch: armhf
-          - name: aarch64
-            host: aarch64-linux-gnu
-            sources_repo: http://ports.ubuntu.com/ubuntu-ports
-            apt_arch: arm64
-          - name: x86_64
-            host: x86_64-linux-gnu
-            sources_repo: http://archive.ubuntu.com/ubuntu
-            apt_arch: amd64
+
     steps:
-      - uses: actions/checkout@v3
-        with:
-          repository: 0xcircuitbreaker/packaging
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - uses: actions/download-artifact@v3
-        with:
-          path: appimage
-
-      - name: Set up environment
-        working-directory: appimage
+      - name: Install Required Packages
         run: |
-          pip3 install --upgrade pyOpenSSL git+https://github.com/AppImageCrafters/appimage-builder@3396839c9e3419f4bd726cb129e54e6da4212e48
+          sudo apt-get update -y
+          sudo apt-get install curl build-essential libtool g++-aarch64-linux-gnu autotools-dev automake pkg-config python3 bsdmainutils cmake -y
 
-      - name: Detect env
-        id: detect
-        shell: bash
+      - name: Build Depends
         run: |
-          SHA8=$(echo ${{ github.sha }} | cut -c1-8)
-          TAG_NAME=$SHA8
-          if [[ $GITHUB_REF == refs/tags/v* ]]; then
-            TAG_NAME=${GITHUB_REF/refs\/tags\//}
-            TAG_NAME=${TAG_NAME/nowp\./}
-            TAG_NAME=${TAG_NAME/nowp/}
-            TAG_NAME=${TAG_NAME/v/}
-          fi
-          echo "sha8=$SHA8" >> $GITHUB_OUTPUT
-          echo "tag-name=$TAG_NAME" >> $GITHUB_OUTPUT
-          echo "build-dir=${PWD}" >> $GITHUB_OUTPUT
+          echo "building with $(nproc) threads"
+          make -C depends -j$(nproc) HOST=aarch64-linux-gnu
 
-      - name: Build AppImage
-        working-directory: appimage
+      - name: Configure
         run: |
-          tar xzf nowp-${{ steps.detect.outputs.sha8 }}-${{ matrix.name }}-linux/nowp-*-${{ matrix.host }}.tar.gz -C AppDir --strip-components=1
-          find AppDir/bin ! -name 'nowp-qt' -type f -exec rm -f {} +
-          VERSION=${{ steps.detect.outputs.tag-name }} SOURCES_REPO=${{ matrix.sources_repo }} APT_ARCH=${{ matrix.apt_arch }} BUILD_ARCH=${{ matrix.name }} appimage-builder --skip-tests
-          mv *.AppImage ${{ steps.detect.outputs.build-dir }}/
+          ./autogen.sh
+          ./configure --prefix=`pwd`/depends/aarch64-linux-gnu
 
-      - uses: actions/upload-artifact@v3
+      - name: Build Binaries
+        run: |
+          make -j$(nproc)
+          mkdir -p ${BUILD_DIR} ${TEST_DIR}
+          mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}/
+          mv src/test/test_nowp ${TEST_DIR}/
+
+      - name: Build Debug Binaries
+        run: |
+          make clean
+          make distclean
+          ./autogen.sh
+          ./configure --prefix=`pwd`/depends/aarch64-linux-gnu
+          make -j$(nproc)
+          mkdir -p ${BUILD_DIR}_debug
+          mv src/{nowp-cli,nowp-util,nowp-wallet,nowp-tx,nowpd,qt/nowp-qt} ${BUILD_DIR}_debug/
+
+      - name: Generate Checksum and Compress
+        run: |
+          mkdir -p ${COMPRESS_DIR}
+          cd ${BUILD_DIR}
+          echo "sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          shasum * >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          echo "openssl-sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          sha256sum * >> checksums.txt
+          cat checksums.txt
+          tar -cvzf ../${COIN_NAME}-arm64-${{ needs.get-version.outputs.version }}.tar.gz *          
+          cd ../${BUILD_DIR}_debug
+          echo "sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          shasum * >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          echo "openssl-sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          sha256sum * >> checksums.txt
+          cat checksums.txt
+          tar -cvzf ../${COIN_NAME}-arm64-debug-${{ needs.get-version.outputs.version }}.tar.gz *
+          cd ..
+          mv *.tar.gz ${COMPRESS_DIR}/
+          cd ${COMPRESS_DIR}
+          echo "sha256: `shasum ${COIN_NAME}-arm64-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "openssl-sha256: `sha256sum ${COIN_NAME}-arm64-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "sha256: `shasum ${COIN_NAME}-arm64-debug-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          echo "openssl-sha256: `sha256sum ${COIN_NAME}-arm64-debug-${{ needs.get-version.outputs.version }}.tar.gz`" >> checksums.txt
+          cd ..
+          cat ${COMPRESS_DIR}/checksums.txt
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
         with:
-          name: nowp-appimage-${{ steps.detect.outputs.tag-name }}-${{ matrix.name }}
-          path: |
-            *.AppImage
-          retention-days: 5
-  release:
-    runs-on: ubuntu-20.04
-    needs: [binary, appimage]
-    if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release-') }}
+          name: ${{ env.COIN_NAME }}-arm64-${{ needs.get-version.outputs.version }}
+          path: ${{ env.COMPRESS_DIR }}
+  
+      - name: Upload Test Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.COIN_NAME }}-arm64-test-${{ needs.get-version.outputs.version }}
+          path: ${{ env.TEST_DIR }}
+
+  build-win64:
+    name: Win64 Build
+    needs: get-version
+    runs-on: ubuntu-22.04
+
     steps:
-      - name: Detect env
-        id: detect
-        shell: bash
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Required Packages
         run: |
-          TAG_NAME=noop
-          RELEASE_TITLE=noop
-          if [[ $GITHUB_REF == refs/heads/master || $GITHUB_REF == refs/heads/release-* ]]; then
-            TAG_NAME=latest
-            RELEASE_TITLE="Development Build: ${GITHUB_REF/refs\/heads\//}"
-          fi
-          if [[ $GITHUB_REF == refs/tags/v* ]]; then
-            TAG_NAME=${GITHUB_REF/refs\/tags\//}
-            TAG_NAME_NO_DOT=${TAG_NAME/nowp\./}
-            RELEASE_TITLE="Release ${TAG_NAME_NO_DOT/nowp/}"
-          fi
-          if [[ -z "${{ secrets.GPG_PRIVATE_KEY }}" ]]; then
-            TAG_NAME=noop
-            RELEASE_TITLE=noop
-          fi
-          echo "tag-name=$TAG_NAME" >> $GITHUB_OUTPUT
-          echo "release-title=${RELEASE_TITLE}" >> $GITHUB_OUTPUT
-          echo "sha8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_OUTPUT
+          sudo apt-get update -y
+          sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 -y
+          sudo apt-get install -y g++-mingw-w64-x86-64 gcc-mingw-w64-x86-64 nsis
+          sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
+          sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
 
-      - name: Set up environment
-        #if: ${{ steps.detect.outputs.tag-name != 'noop' }}
-        run: sudo apt-get update && sudo apt-get install -y mktorrent gpg bash
-
-      - uses: actions/checkout@v3
-        #if: ${{ steps.detect.outputs.tag-name != 'noop' }}
-
-      - uses: actions/download-artifact@v3
-        #if: ${{ steps.detect.outputs.tag-name != 'noop' }}
-
-      - name: Import GPG key
-        #if: ${{ steps.detect.outputs.tag-name != 'noop' }}
-        id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v5
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-
-      - name: GPG user IDs
-        #if: ${{ steps.detect.outputs.tag-name != 'noop' }}
+      - name: Build Depends
         run: |
-          echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
-          echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
-          echo "name:        ${{ steps.import_gpg.outputs.name }}"
-          echo "email:       ${{ steps.import_gpg.outputs.email }}"
-          gpg --keyserver hkp://keyserver.ubuntu.com --send-key ${{ steps.import_gpg.outputs.keyid }}
+          echo "building with $(nproc) threads"
+          make -C depends -j$(nproc) HOST=x86_64-w64-mingw32
 
-      # - name: Create torrent
-      #  # if: ${{ steps.detect.outputs.tag-name != 'noop' }}
-      #   run: |
-      #     mkdir -p ${{ steps.detect.outputs.tag-name }}
-      #     mv nowp-*-**/nowp-*.tar.gz \
-      #       nowp-*-**/nowp-*.zip \
-      #       nowp-*-**/nowp-*.exe \
-      #       nowp-*-**/nowp-*.dmg \
-      #       nowp-*-**/*.AppImage* \
-      #     ${{ steps.detect.outputs.tag-name }}/
-      #     cd ${{ steps.detect.outputs.tag-name }}
-      #     sha256sum * > SHA256SUMS
-      #     gpg --digest-algo sha256 --clearsign SHA256SUMS
-      #     rm SHA256SUMS
-      #     cd -
-      #     mktorrent -w ${{ github.server_url }}/${{ github.repository }}/releases/download \
-      #       -o ${{ steps.detect.outputs.tag-name }}/nowp-${{ steps.detect.outputs.tag-name }}.torrent \
-      #       -a udp://tracker.opentrackr.org:1337/announce \
-      #       -a udp://tracker.openbittorrent.com:6969/announce \
-      #       -a udp://exodus.desync.com:6969/announce \
-      #     ${{ steps.detect.outputs.tag-name }}
-
-      # - name: Check latest
-      #   id: detect-publish-latest
-      #   if: ${{ steps.detect.outputs.tag-name != 'noop' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release-')) }}
-      #   run: |
-      #     PUBLISH=noop
-      #     git fetch origin +refs/tags/latest:refs/tags/latest
-      #     if ! git merge-base --is-ancestor refs/tags/latest HEAD; then
-      #       PUBLISH=op
-      #     fi
-      #     echo "publish=$PUBLISH" >> $GITHUB_OUTPUT
-
-      - name: Generate Changelog
-      #  if: ${{ steps.detect.outputs.tag-name != 'noop' && startsWith(github.ref, 'refs/tags/v') }}
+      - name: Configure
         run: |
-          git fetch --depth=1 origin +${{ github.ref }}:${{ github.ref }}
-          git tag -l --format='%(contents)' ${GITHUB_REF/refs\/tags\//} > ${{ github.workspace }}-CHANGELOG.txt
+          ./autogen.sh
+          ./configure --prefix=`pwd`/depends/x86_64-w64-mingw32
 
-      - uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0
-      #  if: ${{ steps.detect.outputs.tag-name != 'noop' && steps.detect-publish-latest.outputs.publish == 'op' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release-')) }}
-        with:
-          repo_token: ${{ github.token }}
-          automatic_release_tag: ${{ steps.detect.outputs.tag-name }}
-          prerelease: true
-          title: "${{ steps.detect.outputs.release-title }}"
-          files: ${{ steps.detect.outputs.tag-name }}/*
+      - name: Build Binaries
+        run: |
+          make -j$(nproc)
+          mkdir -p ${BUILD_DIR} ${BUILD_DIR}_not_strip ${TEST_DIR}
+          cp src/{nowp-cli.exe,nowp-tx.exe,nowpd.exe,qt/nowp-qt.exe} ${BUILD_DIR}/
+          mv src/{nowp-cli.exe,nowp-tx.exe,nowpd.exe,qt/nowp-qt.exe} ${BUILD_DIR}_not_strip/
+          mv src/test/test_nowp.exe ${TEST_DIR}
+          strip ${BUILD_DIR}/*
 
-      - uses: softprops/action-gh-release@6034af24fba4e5a8e975aaa6056554efe4c794d0
-      #  if: ${{ steps.detect.outputs.tag-name != 'noop' && startsWith(github.ref, 'refs/tags/v') }}
+      - name: Generate Checksum and Compress
+        run: |
+          cd ${BUILD_DIR}
+          echo "sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          shasum * >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          echo "openssl-sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          sha256sum * >> checksums.txt
+          cat checksums.txt
+          zip -r ../${COIN_NAME}-win-${{ needs.get-version.outputs.version }}.zip .
+          cd ../${BUILD_DIR}_not_strip
+          echo "sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          shasum * >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          echo "openssl-sha256:" >> checksums.txt
+          echo "------------------------------------" >> checksums.txt
+          sha256sum * >> checksums.txt
+          cat checksums.txt
+          zip -r ../${COIN_NAME}-win-not_strip-${{ needs.get-version.outputs.version }}.zip .
+          cd ..
+          mkdir -p ${COMPRESS_DIR}
+          mv *.zip ${COMPRESS_DIR}/
+          cd ${COMPRESS_DIR}
+          echo "sha256:         `shasum    ${COIN_NAME}-win-${{ needs.get-version.outputs.version }}.zip`" >> checksums.txt
+          echo "openssl-sha256: `sha256sum ${COIN_NAME}-win-${{ needs.get-version.outputs.version }}.zip`" >> checksums.txt
+          echo "sha256:         `shasum    ${COIN_NAME}-win-not_strip-${{ needs.get-version.outputs.version }}.zip`" >> checksums.txt
+          echo "openssl-sha256: `sha256sum ${COIN_NAME}-win-not_strip-${{ needs.get-version.outputs.version }}.zip`" >> checksums.txt
+          cat checksums.txt
+          cd ..
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
         with:
-          body_path: ${{ github.workspace }}-CHANGELOG.txt
-          token: ${{ github.token }}
-          prerelease: true
-          name: "${{ steps.detect.outputs.release-title }}"
-          files: ${{ steps.detect.outputs.tag-name }}/*
+          name: ${{ env.COIN_NAME }}-win-${{ needs.get-version.outputs.version }}
+          path: ${{ env.COMPRESS_DIR }}
+
+      - name: Upload Test Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.COIN_NAME }}-win-test-${{ needs.get-version.outputs.version }}
+          path: ${{ env.TEST_DIR }}
+
+      - name: Generate window installation file
+        run: |
+          make deploy
+          mkdir win64-installation
+          mv *.exe win64-installation/
+          cd win64-installation
+          echo "sha256: `shasum *.exe`" >> checksums.txt
+          echo "openssl-sha25: `sha256sum *.exe`" >> checksums.txt
+          cd ..
+
+      - name: Upload Win64 installation file
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.COIN_NAME }}-win-installation-${{ needs.get-version.outputs.version }}
+          path: win64-installation
