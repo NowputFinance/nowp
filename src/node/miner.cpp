@@ -582,6 +582,11 @@ void PoSMiner(std::shared_ptr<CWallet> pwallet, NodeContext& m_node)
         return;
     }
 
+    if(!pwallet->GetLegacyScriptPubKeyMan()){
+        LogPrintf("proof-of-stake minter disabled. Descriptor wallet not supported\n");
+        return;
+    }
+
     try {
         bool fNeedToClear = false;
         while (true) {
