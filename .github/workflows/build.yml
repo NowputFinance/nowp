@@ -10,6 +10,7 @@ on:
   pull_request:
     branches:
       - develop
+      - master
 env:
   COIN_NAME: nowp
   BUILD_DIR: nowp-build
