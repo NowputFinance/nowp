@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 
+class CBlock;
 class CBlockHeader;
 class CBlockIndex;
 class uint256;
@@ -20,5 +21,6 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 
 /** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&);
+bool CheckPOW(const CBlock& block, const Consensus::Params& consensusParams);
 
 #endif // BITCOIN_POW_H

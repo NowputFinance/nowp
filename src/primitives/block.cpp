@@ -40,6 +40,8 @@ uint256 CBlockHeader::GetPOWHash(bool readCache) const
             // We cannot use the loggers at this level
             std::cerr << "PowCache failure: headerHash: " << headerHash.ToString() << ", from cache: " << powHash.ToString() << ", computed: " << powHash2.ToString() << ", correcting" << std::endl;
         }
+        powHash = powHash2;
+        cache.erase(headerHash); // If it exists, replace it
         cache.insert(headerHash, powHash2);
     }
     return powHash;

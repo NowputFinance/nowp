@@ -15,6 +15,7 @@
 #include <kernel.h>
 #include <math.h>
 #include <timedata.h>
+#include <logging.h>
 
 
 unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const Consensus::Params& params, bool fProofOfStake) {
@@ -194,5 +195,20 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&
     if (UintToArith256(hash) > bnTarget)
         return false;
 
+    return true;
+}
+
+bool CheckPOW(const CBlock& block, const Consensus::Params& consensusParams)
+{
+    if (block.IsProofOfStake())
+        return true;
+
+    if (!CheckProofOfWork(block.GetPOWHash(), block.nBits, consensusParams)) {
+        std::string str = block.IsProofOfWork() ?  "POW" : "POS";
+        LogPrintf("CheckPOW: CheckProofOfWork failed for %s, retesting without POW cache, block type %s\n", block.GetHash().ToString(), str);
+
+        // Retest without POW cache in case cache was corrupted:
+        return CheckProofOfWork(block.GetPOWHash(false), block.nBits, consensusParams);
+    }
     return true;
 }

@@ -577,10 +577,12 @@ bool ReadBlockFromDisk(CBlock& block, const FlatFilePos& pos, const Consensus::P
         return error("%s: Deserialize or I/O error - %s at %s", __func__, e.what(), pos.ToString());
     }
 
-   /* // Check the header
-    if (block.IsProofOfWork() && !CheckProofOfWork(block.GetPOWHash(), block.nBits, consensusParams)) {
-        return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
-    }*/
+    // Check the header
+    if (block.IsProofOfWork()){
+        if (!CheckPOW(block, consensusParams)) {
+            return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
+        }
+    }
 
     // Signet only: check block solution
     if (consensusParams.signet_blocks && !CheckSignetBlockSolution(block, consensusParams)) {
@@ -594,17 +596,6 @@ bool ReadBlockFromDisk(CBlock& block, const FlatFilePos& pos, const Consensus::P
     return true;
 }
 
-bool CheckPOW(const CBlock& block, const Consensus::Params& consensusParams)
-{
-    if (!CheckProofOfWork(block.GetPOWHash(), block.nBits, consensusParams)) {
-        LogPrintf("CheckPOW: CheckProofOfWork failed for %s, retesting without POW cache\n", block.GetHash().ToString());
-
-        // Retest without POW cache in case cache was corrupted:
-        return CheckProofOfWork(block.GetPOWHash(false), block.nBits, consensusParams);
-    }
-    return true;
-}
-
 bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams)
 {
     const FlatFilePos block_pos{WITH_LOCK(cs_main, return pindex->GetBlockPos())};
@@ -612,7 +603,7 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
     if (!ReadBlockFromDisk(block, block_pos, consensusParams)) {
         return false;
     }
-    if (!CheckPOW(block, consensusParams)) {
+    if (block.GetHash() != pindex->GetBlockHash()) {
         return error("ReadBlockFromDisk(CBlock&, CBlockIndex*): GetHash() doesn't match index for %s at %s",
                      pindex->ToString(), block_pos.ToString());
     }
