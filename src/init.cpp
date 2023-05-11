@@ -128,8 +128,6 @@ static const char* DEFAULT_ASMAP_FILENAME="ip_asn.map";
  */
 static const char* BITCOIN_PID_FILENAME = "nowpd.pid";
 
-static std::shared_ptr<CWallet> walletTmp;
-
 static fs::path GetPidFile(const ArgsManager& args)
 {
     return AbsPathForConfigVal(fs::PathFromString(args.GetArg("-pid", BITCOIN_PID_FILENAME)));
@@ -1780,10 +1778,8 @@ bool AppInitMain(NodeContext& node, interfaces::BlockAndHeaderTipInfo* tip_info)
 #endif
 #ifdef ENABLE_WALLET
 {
-// nowptodo: deal with multiple wallets
-    if (node.wallet_loader->getWallets().size() && gArgs.GetBoolArg("-stakegen", true)) {
-        walletTmp = std::shared_ptr<CWallet>(node.wallet_loader->getWallets()[0]->wallet());
-        MintStake(walletTmp, node);
+    if (gArgs.GetBoolArg("-stakegen", true)) {
+        MintStake(node);
         }
 }
 #endif
