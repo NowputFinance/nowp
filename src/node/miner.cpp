@@ -551,17 +551,17 @@ void PoSMiner(NodeContext& m_node)
     util::ThreadRename("nowp-stake-minter");
 
     unsigned int nExtraNonce = 0;
-    if (!connman->interruptNet.sleep_for(std::chrono::seconds(10)))
+    //give some time for wallets to load
+    if (!connman->interruptNet.sleep_for(std::chrono::seconds(120)))
         return;
     // Compute timeout for pos as sqrt(numUTXO)
     unsigned int pos_timio;
     {
-        LOCK(cs_main);
         auto wallets = m_node.wallet_loader->getWallets();
         int total_coins = 0;
         for(int i = 0; i < wallets.size(); i++){
             auto pwallet = wallets[i]->wallet();
-            LOCK(pwallet->cs_wallet); 
+            LOCK2(pwallet->cs_wallet, cs_main); 
             std::vector<COutput> vCoins;
             CCoinControl coincontrol;
             AvailableCoins(*pwallet, vCoins, &coincontrol);
